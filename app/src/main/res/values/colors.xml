@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="BLACK">#000000</color>
+    <color name="WHITE">#FFFFFF</color>
+    <color name="BLUE">#0099FF</color>
+    <color name="ColorButton">#3366CC</color>
+    <color name="ColorToolbar">#4A90E2</color>
+    <color name="Gray">#999999</color>
+    <color name="LITTLEBLACK">#333333</color>
+
+
+    <color name="colorBack_med">#3a97bd</color>
+    <color name="colorBack_end">#8c56a7</color>
+
+    <color name="colorLogin">#4a90e2</color>
+    <color name="colorEditPhone">#50E3C2</color>
+    <color name="colorEditPassword">#8ee1ce</color>
+
+    <color name="colorButtonO">#b6fa72</color>
+    <color name="colorButtonI">#b8e986</color>
+    <color name="colorButton0">#eebdfd7c</color>
+    <color name="colorButton1">#e9b9f97a</color>
+    <color name="colorButton2">#c1bdf982</color>
+    <color name="colorButton3">#6fbdf982</color>
+    <color name="colorButton4">#62c0f78a</color>
+    <color name="colorButton5">#37d0ffa2</color>
+
+    <color name="colorClear">#00fcf9f9</color>
+    <color name="colorMidClear">#7fffffff</color>
+
+    <color name="ColorDialogBackground">#FFFFFF</color>
+
+    <color name="flat_pressed">#66999999</color>
+    <color name="flat_disabled_text">#40000000</color>
+    <color name="flat_normal_text">#000000</color>
+    <color name="black_semi_transparent">#B2000000</color>
+    <color name="background">#e5e5e5</color>
+    <color name="half_black">#808080</color>
+    <color name="white">#fafafa</color>
+    <color name="white_pressed">#f1f1f1</color>
+    <color name="pink">#e91e63</color>
+    <color name="pink_pressed">#ec407a</color>
+    <color name="blue_semi_transparent">#805677fc</color>
+    <color name="blue_semi_transparent_pressed">#80738ffe</color>
+    <color name="blue_background_float_button_normal">#6495ED</color>
+    <color name="blue_background_float_button_pressed">#80738ffe</color>
+
+</resources>
