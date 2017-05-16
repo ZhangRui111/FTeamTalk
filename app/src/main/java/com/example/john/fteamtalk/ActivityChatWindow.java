@@ -20,6 +20,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +46,8 @@ public class ActivityChatWindow extends AppCompatActivity implements View.OnClic
     private AdapterChatMessage chatAdapter;
     private ListView lv_chat_listView;
     private List<DataChatMessage> personChats = new ArrayList<>();
+
+    private RequestQueue mQueue;
 
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
@@ -115,10 +124,36 @@ public class ActivityChatWindow extends AppCompatActivity implements View.OnClic
                 chatAdapter.notifyDataSetChanged(); //当有新消息的时候，刷新ListView中的显示
                 lv_chat_listView.setSelection(personChats.size());  //将ListView定位到最后一行
                 msgEdt.setText(""); //清空输入框的内容
+                funcSendMsgToFriend("123","gyh",content);
                 break;
             default:
                 break;
         }
+    }
+
+    private void funcSendMsgToFriend(String nickname, String friendName, String msg) {
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(this);
+        }
+
+        String urlNewMsg = "http://211.83.107.1:8037/TeamTalk/SendMessage.action?username=" + nickname + "&friendName=" + friendName + "&message" +
+                msg +"&time" + "201705121123";
+
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlNewMsg, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Toast.makeText(ActivityChatWindow.this, "OK" + s, Toast.LENGTH_SHORT).show();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        });
+
+        mQueue.add(loginRequest);
     }
 
     private void initSend() {

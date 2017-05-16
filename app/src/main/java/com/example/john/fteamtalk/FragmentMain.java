@@ -4,10 +4,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,10 +23,19 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.john.fteamtalk.UtilsFinalArguments.HANDLER_NEW_FRIEND;
 
 /**
  * Created by john on 2017/3/22.
@@ -42,6 +54,22 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
     //data
     private List<DataFriendInfo> dataList;
     private AdapterFriendList myAdapter;
+
+    //Quene
+    private RequestQueue mQueue;
+
+    public Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case HANDLER_NEW_FRIEND:
+                    waitingDialog.dismiss();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     @Nullable
     @Override
@@ -176,6 +204,16 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
+                final String friendName = input.getText().toString();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        //在子线程中进行网络请求
+                        funcIfExist("123",friendName);  /*用户真实昵称需要更改这里*/
+                    }
+                }.start();
+
                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
                 builder.setTitle("正在查找");
                 builder.setCancelable(false);
@@ -184,12 +222,36 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
                 builder.setCancelable(true);
                 waitingDialog = builder.create();
                 waitingDialog.show();  //记得添加dismiss
-                /*SystemClock.sleep(2000);  //主线程休眠2秒
-                waitingDialog.dismiss();*/
+
                 dialog.dismiss();
             }
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void funcIfExist(String myNickName, String otherNickName) {
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(getActivity());
+        }
+
+        String urlNewFriend = "http://211.83.107.1:8037/TeamTalk/VerifyFriend.action?username=" + myNickName + "&friendName=" + otherNickName;
+
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlNewFriend, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Toast.makeText(getActivity(), "OK" + s, Toast.LENGTH_SHORT).show();
+
+                handler.sendEmptyMessage(HANDLER_NEW_FRIEND);//发送消失到handler，通知主线程修改昵称成功
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        });
+
+        mQueue.add(loginRequest);
     }
 }

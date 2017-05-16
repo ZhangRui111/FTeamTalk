@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -141,8 +142,8 @@ public class ActivityRegister extends BaseActivity implements View.OnClickListen
         phoneInputString = phoneInputEdt.getText().toString();
         passwordInputString = passwordInputEdt.getText().toString();
 
-        ActivityMain.actionStart(ActivityRegister.this);
-        /*if (phoneInputString == null || phoneInputString.equals("")) {
+        //ActivityMain.actionStart(ActivityRegister.this);
+        if (phoneInputString == null || phoneInputString.equals("")) {
             Toast.makeText(this, "手机号码不能为空哦", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -157,9 +158,8 @@ public class ActivityRegister extends BaseActivity implements View.OnClickListen
                 inputMethodManager.hideSoftInputFromWindow(passwordInputEdt.getWindowToken(),0);// 隐藏输入法
             }
             //根据输入的手机号和密码与后台通信对比，检查登陆的合法性
-            //funcCheckLegitimacy(phoneInputString, passwordInputString);
-            ActivityMain.actionStart(ActivityRegister.this);
-        }*/
+            funcCheckLegitimacy(phoneInputString, passwordInputString);
+        }
     }
 
     private void funcCheckLegitimacy(String phoneInputString, String passwordInputString) {
@@ -182,10 +182,12 @@ public class ActivityRegister extends BaseActivity implements View.OnClickListen
             mQueue = Volley.newRequestQueue(ActivityRegister.this);
         }
 
-        StringRequest loginRequest = new StringRequest(Request.Method.POST, "http://cmweb.top:3000/users", new Response.Listener<String>() {
+        String urlregister = "http://211.83.107.1:8037/TeamTalk/login.action?username=" + phoneTmp + "&password=" + passwordTmp;
+
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlregister, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                //Log.d("INFON", s);
+                Log.d("INFON", s);
                 Gson gson = new Gson();
 
                 //转入主界面
@@ -199,15 +201,7 @@ public class ActivityRegister extends BaseActivity implements View.OnClickListen
                 Toast.makeText(ActivityRegister.this, "用户名已存在", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
             }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> map = new HashMap<>();
-                map.put("user[mobile]", phoneTmp);
-                map.put("user[password]", passwordTmp);
-                return map;
-            }
-        };
+        });
 
         mQueue.add(loginRequest);
     }

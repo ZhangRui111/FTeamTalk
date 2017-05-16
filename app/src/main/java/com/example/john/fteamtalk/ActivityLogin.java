@@ -225,9 +225,9 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         userPhoneInput = userPhoneInputEdt.getText().toString();
         passwordInput = passwordInputEdt.getText().toString();
 
-        ActivityMain.actionStart(ActivityLogin.this);
+        //ActivityMain.actionStart(ActivityLogin.this);
         // 检查输入是否为空
-        /*if (userPhoneInput == null || userPhoneInput.equals("")) {
+        if (userPhoneInput == null || userPhoneInput.equals("")) {
             Toast.makeText(this, "手机号码不能为空哦", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -237,7 +237,7 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         }
         else {
             funcConnectAndLogin(userPhoneInput, passwordInput);
-        }*/
+        }
 
     }
 
@@ -246,6 +246,9 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         //声明为final的变量才能用于内部类
         final String phoneTmp = phone;
         final String passwordTmp = password;
+
+
+        String urllogin = "http://211.83.107.1:8037/TeamTalk/login.action?username=" + phoneTmp + "&password=" + passwordTmp;
 
         //提示正在登陆
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityLogin.this, R.style.MyAlertDialogStyle);
@@ -260,13 +263,13 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         if (mQueue == null) {
             mQueue = Volley.newRequestQueue(ActivityLogin.this);
         }
-        StringRequest loginRequest = new StringRequest(Request.Method.POST, "http://cmweb.top:3000/sessions", new Response.Listener<String>() {
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urllogin, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 //Log.d("TAG", s);
 
                 Gson gson = new Gson();
-
+                Toast.makeText(ActivityLogin.this, "OK", Toast.LENGTH_SHORT).show();
                 //转入主界面
                 ActivityMain.actionStart(ActivityLogin.this);
                 overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
@@ -278,15 +281,7 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
                 Toast.makeText(ActivityLogin.this, "密码或者用户名错误！", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
             }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> map = new HashMap<>();
-                map.put("user[mobile]", phoneTmp);
-                map.put("user[password]", passwordTmp);
-                return map;
-            }
-        };
+        });
 
         mQueue.add(loginRequest);
         //这里的返回值没有实际意义

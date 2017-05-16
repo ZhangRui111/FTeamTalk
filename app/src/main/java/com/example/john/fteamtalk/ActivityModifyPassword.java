@@ -178,46 +178,6 @@ public class ActivityModifyPassword extends AppCompatActivity implements View.On
 
     private void funcCheckPassword(String oldString, String newString) {
 
-        /*final String localOld, localNew;
-        localOld = oldString;
-        localNew = newString;
-
-        //初始化一个网络请求队列
-        if (mQueue == null) {
-            mQueue = Volley.newRequestQueue(ActivityModifyPassword.this);
-        }
-
-        StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, "http://cmweb.top:3000/users/edit_password", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                //Looper.prepare();
-                handler.sendEmptyMessage(HANDLER_MODIFY_PASSWORD_OK);//发送消失到handler，通知主线程修改密码成功
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                //Looper.prepare();
-                handler.sendEmptyMessage(HANDLER_MODIFY_PASSWORD_ERROR);//发送消失到handler，通知主线程修改密码成功
-            }
-        }) {
-            //给Http请求增加请求参数
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> map = new HashMap<>();
-                map.put("user[current_password]", localOld);
-                map.put("user[password]", localNew);
-                return map;
-            }
-            //给Http请求增加头部标签
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<>();
-                params.put("Authorization", staticUserInfo.getAuth_token());
-                return params;
-            }
-        };
-
-        mQueue.add(modifyPasswordRequest);*/
     }
 
     public static void actionStart(Context context){

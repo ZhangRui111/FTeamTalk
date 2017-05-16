@@ -70,6 +70,8 @@ import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.iconPath;
 import static com.example.john.fteamtalk.UtilsFinalArguments.ifBackLive;
 import static com.example.john.fteamtalk.UtilsFinalArguments.ifValid;
+import static com.example.john.fteamtalk.UtilsLibrary.bitmapToBase64;
+import static com.example.john.fteamtalk.UtilsLibrary.decodeFileUtils;
 
 /**
  * Created by john on 2017/3/22.
@@ -298,14 +300,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
         iconPath = result.getImage().getOriginalPath();
         funcWriteSharePreferencesIcon(iconPath, getActivity());
 
-        /*new Thread() {
-            @Override
-            public void run() {
-                //上传头像
-                funcUploadUserIcon(decodeFileUtils(iconPath));
-            }
-        }.start();*/
-        funcFreshIcon();
+        funcUploadUserIcon(decodeFileUtils(iconPath));
 
         //progressBar
         /*android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
@@ -371,88 +366,30 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
      */
     private void funcUploadUserIcon(final Bitmap userBitmap) {
 
-        /*String url = "http://cmweb.top:3000/users/me";
-        VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.PUT, url, new Response.Listener<NetworkResponse>() {
-            @Override
-            public void onResponse(NetworkResponse response) {
-                String resultResponse = new String(response.data);
-                Log.i("ICON_TAG", resultResponse);
+        String bitmap64 = bitmapToBase64(userBitmap);
 
-                //handler处理UI
-                handler.sendEmptyMessage(HANDLER_USER_ICON);//发送消失到handler，通知主线程修改头像成功
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(getActivity());
+        }
+        Toast.makeText(getActivity(), "64:" + bitmap64, Toast.LENGTH_SHORT).show();
+
+        String urlUpdateIcon = "http://211.83.107.1:8037/TeamTalk/uploadHead.action?username=" + "123" + "&userhead=" + bitmap64;
+
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlUpdateIcon, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Toast.makeText(getActivity(), "OK" + s, Toast.LENGTH_SHORT).show();
+
+                //handler.sendEmptyMessage(HANDLER_USER_ICON);//发送消失到handler，通知主线程修改昵称成功
             }
         }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                NetworkResponse networkResponse = error.networkResponse;
-                String errorMessage = "Unknown error";
-                if (networkResponse == null) {
-                    if (error.getClass().equals(TimeoutError.class)) {
-                        errorMessage = "Request timeout";
-                    } else if (error.getClass().equals(NoConnectionError.class)) {
-                        errorMessage = "Failed to connect server";
-                    }
-                } else {
-                    String result = new String(networkResponse.data);
-                    try {
-                        JSONObject response = new JSONObject(result);
-                        String status = response.getString("status");
-                        String message = response.getString("message");
+            public void onErrorResponse(VolleyError volleyError) {
 
-                        Log.e("Error Status", status);
-                        Log.e("Error Message", message);
-
-                        if (networkResponse.statusCode == 404) {
-                            errorMessage = "Resource not found";
-                        } else if (networkResponse.statusCode == 401) {
-                            errorMessage = message+" Please login again";
-                        } else if (networkResponse.statusCode == 400) {
-                            errorMessage = message+ " Check your inputs";
-                        } else if (networkResponse.statusCode == 500) {
-                            errorMessage = message+" Something is getting wrong";
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Log.i("ICON_TAG", errorMessage);
-
-                Message msg = new Message();
-                msg.what = HANDLER_USER_ICON_ERROR;
-                Bundle bundle = new Bundle();
-                bundle.putString("ErrorMessage",errorMessage);  //往Bundle中存放数据
-                msg.setData(bundle);//mes利用Bundle传递数据
-                handler.sendMessage(msg);//发送消失到handler，通知主线程修改头像失败
-
-                error.printStackTrace();
             }
-        }) {
-            //给Http请求增加请求参数
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> map = new HashMap<>();
-                map.put("user[gender]", staticUserInfo.getUser().getGender() + "");
-                return map;
-            }
-            //给Http请求增加头部标签
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<>();
-                params.put("Authorization", staticUserInfo.getAuth_token());
-                return params;
-            }
+        });
 
-            @Override
-            protected Map<String, DataPart> getByteData() {
-                Map<String, DataPart> params = new HashMap<>();
-                // file name could found file base or direct access from real path
-                // for now just get bitmap data from ImageView
-                params.put("user[avatar]", new DataPart("file_avatar.jpg", UtilsLibrary.getFileDataFromDrawable(getActivity(), userBitmap), "image/jpeg"));
-                return params;
-            }
-        };
-
-        VolleySingleton.getInstance(getActivity()).addToRequestQueue(multipartRequest);*/
+        mQueue.add(loginRequest);
     }
 
     private void funcFreshIcon() {
@@ -466,49 +403,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
     private void funcSetNickname() {
         Toast.makeText(getActivity(), "funcSetNickname", Toast.LENGTH_SHORT).show();
 
-        /*final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
-        builder.setTitle("Change your NickName");
-        final EditText input = new EditText(getActivity());
-        input.setSingleLine();
-        input.setGravity(Gravity.CENTER_HORIZONTAL);
-        //自定义EditText颜色
-        input.setBackgroundResource(R.drawable.edittext_input_line);
-        input.setText(staticUserInfo.getUser().getNickname());
-        builder.setView(input,20,20,20,20);;
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                userName = input.getText().toString();
 
-                new Thread() {
-                    @Override
-                    public void run() {
-                        //在子线程中进行网络请求
-                        funcUploadUserNickName(userName);
-                    }
-                }.start();
-
-                //progressBar
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
-                builder.setTitle("正在上传");
-                builder.setCancelable(false);
-                ProgressBar progressBar = new ProgressBar(getActivity());
-                builder.setView(progressBar,20,20,20,20);
-                builder.setCancelable(false);
-                waitingDialog = builder.create();
-                waitingDialog.show();
-
-                dialog.dismiss();
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();*/
     }
 
     /**
@@ -517,42 +412,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
      */
     private void funcUploadUserNickName(String data) {
 
-        /*final String userName = data;
 
-        //网络Http修改昵称
-        if (mQueue == null) {
-            mQueue = Volley.newRequestQueue(getActivity());
-        }
-
-        StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, "http://cmweb.top:3000/users/me", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                //成功修改昵称。handler处理UI
-                handler.sendEmptyMessage(HANDLER_USER_NICKNAME);//发送消失到handler，通知主线程修改昵称成功
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                handler.sendEmptyMessage(HANDLER_USER_NICKNAME_ERROR);//发送消失到handler，通知主线程修改昵称失败
-            }
-        }) {
-            //给Http请求增加请求参数
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> map = new HashMap<>();
-                map.put("user[gender]", staticUserInfo.getUser().getGender() + "");
-                map.put("user[nickname]", userName);
-                return map;
-            }
-            //给Http请求增加头部标签
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<>();
-                params.put("Authorization", staticUserInfo.getAuth_token());
-                return params;
-            }
-        };
-        mQueue.add(modifyPasswordRequest);*/
     }
 
     /**
@@ -561,48 +421,6 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
     private void funcChooseGender() {
 
         Toast.makeText(getActivity(), "funcChooseGender", Toast.LENGTH_SHORT).show();
-        /*final String items[] = new String[]{"IT部","秘书处","后勤部","销售部","经理部"};
-
-        final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
-        builder.setTitle("Setting");
-        builder.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                userSex = items[which] + "";
-            }
-        });
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                new Thread() {
-                    @Override
-                    public void run() {
-                        //在子线程中进行网络请求
-                        funcUploadUserGender();
-                    }
-                }.start();
-
-                //progressBar
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
-                builder.setTitle("正在上传");
-                builder.setCancelable(false);
-                ProgressBar progressBar = new ProgressBar(getActivity());
-                builder.setView(progressBar,20,20,20,20);
-                builder.setCancelable(false);
-                waitingDialog = builder.create();
-                waitingDialog.show();
-                dialog.dismiss();
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();*/
     }
 
     /**
@@ -610,40 +428,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
      */
     private void funcUploadUserGender() {
         //网络Http修改昵称
-       /* if (mQueue == null) {
-            mQueue = Volley.newRequestQueue(getActivity());
-        }
 
-        StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, "http://cmweb.top:3000/users/me", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                //修改成功，handler修改UI
-                handler.sendEmptyMessage(HANDLER_USER_GENDER);//发送消失到handler，通知主线程修改性别成功
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                handler.sendEmptyMessage(HANDLER_USER_GENDER_ERROR);//发送消失到handler，通知主线程修改性别失败
-            }
-        }) {
-            //给Http请求增加请求参数
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> map = new HashMap<>();
-                map.put("user[gender]", (!userSex.equals("男")?0:1) + "");
-                map.put("user[nickname]", staticUserInfo.getUser().getNickname());
-                return map;
-            }
-            //给Http请求增加头部标签
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<>();
-                params.put("Authorization", staticUserInfo.getAuth_token());
-                return params;
-            }
-        };
-
-        mQueue.add(modifyPasswordRequest);*/
     }
 
     /**
@@ -652,31 +437,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
     private void funcLogOff() {
 
         ActivityCollector.finishAll();
-        /*if (mQueue == null) {
-            mQueue = Volley.newRequestQueue(getActivity());
-        }
 
-        StringRequest modifyPasswordRequest = new StringRequest(Request.Method.DELETE, "http://cmweb.top:3000/sessions", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                ActivityCollector.finishAll();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(getActivity(), "用户没有登录！", Toast.LENGTH_SHORT).show();
-            }
-        }) {
-            //给Http网络请求增加头部标签
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<>();
-                params.put("Authorization", staticUserInfo.getAuth_token());
-                return params;
-            }
-        };
-
-        mQueue.add(modifyPasswordRequest);*/
     }
 
     /**

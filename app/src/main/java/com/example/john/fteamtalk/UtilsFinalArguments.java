@@ -27,6 +27,7 @@ public class UtilsFinalArguments {
     public static final int HANDLER_NONE_MESSAGE = 156;
     public static final int HANDLER_MODIFY_PASSWORD_OK = 157;
     public static final int HANDLER_MODIFY_PASSWORD_ERROR = 158;
+    public static final int HANDLER_NEW_FRIEND = 159;
 
     //用户信息
     public static Boolean isPicLocal = false;  //头像是否保存到了本地
