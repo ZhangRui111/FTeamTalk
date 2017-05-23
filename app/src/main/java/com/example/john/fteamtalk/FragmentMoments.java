@@ -1,8 +1,11 @@
 package com.example.john.fteamtalk;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +19,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import static com.example.john.fteamtalk.UtilsFinalArguments.HANDLER_MOMENTS_NEW_MESSAGE;
 import static com.example.john.fteamtalk.UtilsFinalArguments.HANDLER_NEW_FRIEND;
 
 /**
@@ -28,6 +32,23 @@ public class FragmentMoments extends Fragment {
     private Button getMsgBtn;
 
     private RequestQueue mQueue;
+
+
+    public Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                /**
+                 * 经鉴定,可以通过getSupportFragmentManager().findFragmentByTag();
+                 * & handler从Activity修改Fragment的UI
+                 */
+                case HANDLER_MOMENTS_NEW_MESSAGE:
+                    Log.i("TTT","fragment");
+                    getMsgBtn.setText("OK");
+                    break;
+            }
+        }
+    };
 
     @Nullable
     @Override
@@ -97,6 +118,9 @@ public class FragmentMoments extends Fragment {
 
     }
 
+    public void funcToast(){
+        handler.sendEmptyMessage(HANDLER_MOMENTS_NEW_MESSAGE);//发送消失到handler，通知主线程修改昵称成功
+    }
 
     private void funcInitInfo() {
         if (mQueue == null) {

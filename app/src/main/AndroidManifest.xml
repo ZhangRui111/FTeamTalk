@@ -44,6 +44,8 @@
             android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".ActivityContact"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name=".ActivityInitInfo"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
 
 </manifest>

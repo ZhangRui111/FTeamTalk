@@ -88,6 +88,7 @@ public class ActivityMain extends BaseActivity
     //
     private Timer timer;
     private TimerTask msgTask;
+    private TimerTask msgPicTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,7 +207,7 @@ public class ActivityMain extends BaseActivity
         FragmentTransaction mFragmentTransaction = mFragmentManager.beginTransaction();
         if(fragmentMoments == null){
             fragmentMoments = new FragmentMoments();
-            mFragmentTransaction.replace(R.id.main_fragment_layout,fragmentMoments);
+            mFragmentTransaction.replace(R.id.main_fragment_layout,fragmentMoments,"tagFragmentMoments");
         }else{
             mFragmentTransaction.show(fragmentMoments);
         }
@@ -217,9 +218,11 @@ public class ActivityMain extends BaseActivity
         timer = new Timer();
 
         msgTask = new receiveMsgTask();
+        msgPicTask = new receiveMsgPicTask();
 
-        timer.schedule(msgTask,0,10*1000);//0毫秒后每2分钟执行该任务一次
+        timer.schedule(msgTask,5000,5*1000);//0毫秒后每10秒执行该任务一次--接收消息
         //timer.schedule(msgTask,1*60*1000);//1分钟后执行该任务一次
+        timer.schedule(msgPicTask,6000,5*1000);  //1秒后每15秒执行该任务一次--接收图片
     }
 
     @Override
@@ -289,7 +292,7 @@ public class ActivityMain extends BaseActivity
                 hideAllFragment(mFragmentTransaction);
                 if(fragmentMain == null){
                     fragmentMain = new FragmentMain();
-                    mFragmentTransaction.add(R.id.main_fragment_layout,fragmentMain);
+                    mFragmentTransaction.add(R.id.main_fragment_layout,fragmentMain,"tagFragmentMain");
                 }else{
                     mFragmentTransaction.show(fragmentMain);
                 }
@@ -302,7 +305,7 @@ public class ActivityMain extends BaseActivity
                 hideAllFragment(mFragmentTransaction);
                 if (fragmentMoments == null){
                     fragmentMoments = new FragmentMoments();
-                    mFragmentTransaction.add(R.id.main_fragment_layout,fragmentMoments);
+                    mFragmentTransaction.add(R.id.main_fragment_layout,fragmentMoments,"tagFragmentMoments");
                 }else {
                     mFragmentTransaction.show(fragmentMoments);
                 }
@@ -315,7 +318,7 @@ public class ActivityMain extends BaseActivity
                 hideAllFragment(mFragmentTransaction);
                 if (fragmentSettings == null){
                     fragmentSettings = new FragmentSettings();
-                    mFragmentTransaction.add(R.id.main_fragment_layout,fragmentSettings);
+                    mFragmentTransaction.add(R.id.main_fragment_layout,fragmentSettings,"tagFragmentSetting");
                 }else {
                     mFragmentTransaction.show(fragmentSettings);
                 }
@@ -368,45 +371,7 @@ public class ActivityMain extends BaseActivity
     protected void onDestroy() {
         super.onDestroy();
         msgTask.cancel();
-    }
-
-    private void initUserInfo() {
-        String urllogin = "http://211.83.107.1:8037/TeamTalk/initInfo.action?username=" +   "&password=";
-
-        //提示正在登陆
-        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityMain.this, R.style.MyAlertDialogStyle);
-        builder.setTitle("更新用户信息");
-        builder.setCancelable(false);
-        ProgressBar progressBar = new ProgressBar(ActivityMain.this);
-        builder.setView(progressBar,20,20,20,20);
-        dialog = builder.create();
-        dialog.show();
-
-        //初始化一个网络请求队列
-        if (mQueue == null) {
-            mQueue = Volley.newRequestQueue(ActivityMain.this);
-        }
-        StringRequest loginRequest = new StringRequest(Request.Method.POST, urllogin, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                //Log.d("TAG", s);
-
-                Gson gson = new Gson();
-                DataLoginRegister dataLoginRegister = gson.fromJson(s,DataLoginRegister.class);
-
-                //转入主界面
-                ActivityMain.actionStart(ActivityMain.this);
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
-                dialog.dismiss();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(ActivityMain.this, "密码或者用户名错误！", Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-            }
-        });
-        mQueue.add(loginRequest);
+        msgPicTask.cancel();
     }
 
     /**
@@ -479,23 +444,26 @@ public class ActivityMain extends BaseActivity
         @Override
         public void run() {
             //任务代码写在此处
-            //Toast.makeText(ActivityMain.this, "msg", Toast.LENGTH_SHORT).show();
-
+            Log.i("TTT","task1");
+            //通过Tag获取Fragment实例，进而调用Fragment里的方法
+            FragmentMoments fragmentMoments =
+                    (FragmentMoments) getSupportFragmentManager().findFragmentByTag("tagFragmentMoments");
+            fragmentMoments.funcToast();
             //初始化一个网络请求队列
-            if (mQueue == null) {
+            /*if (mQueue == null) {
                 mQueue = Volley.newRequestQueue(ActivityMain.this);
             }
 
             String urlReceiveMsg = "http://115.28.66.165:8080/receiveMessage.action?username=" + userInfoStatic.getUsername() ;
 
-            StringRequest loginRequest = new StringRequest(Request.Method.POST, urlReceiveMsg, new Response.Listener<String>() {
+            StringRequest receiveMsgRequest = new StringRequest(Request.Method.POST, urlReceiveMsg, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
                     Log.i("TTT",s);
                     Gson gson = new Gson();
                     DataReceiveMessage data;
                     data = gson.fromJson(s,DataReceiveMessage.class);
-                    Log.i("TTT","msg:" + data.getMsg());
+                    Log.i("TTT","msg:" + data.getData().getMessage());
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -504,7 +472,39 @@ public class ActivityMain extends BaseActivity
                 }
             });
 
-            mQueue.add(loginRequest);
+            mQueue.add(receiveMsgRequest);*/
+        }
+    }
+
+    public class receiveMsgPicTask extends TimerTask {
+        @Override
+        public void run() {
+            //任务代码写在此处
+            Log.i("TTT","task2");
+            /*//初始化一个网络请求队列
+            if (mQueue == null) {
+                mQueue = Volley.newRequestQueue(ActivityMain.this);
+            }
+
+            String urlReceiveMsgPic = "http://115.28.66.165:8080/receivePicture.action?username=" + userInfoStatic.getUsername() ;
+
+            StringRequest receiveMsgPicRequest = new StringRequest(Request.Method.POST, urlReceiveMsgPic, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    Log.i("TTT",s);
+                    Gson gson = new Gson();
+                    DataReceivePicture data;
+                    data = gson.fromJson(s,DataReceivePicture.class);
+                    Log.i("TTT","msg:" + data.getData().getHead());
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+
+                }
+            });
+
+            mQueue.add(receiveMsgPicRequest);*/
         }
     }
 

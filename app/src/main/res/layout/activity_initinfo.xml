@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/background_login">
+
+    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:navigationIcon="@mipmap/ic_keyboard_backspace_white_24dp"
+        android:navigationIcon="@mipmap/ic_keyboard_backspace_white_24dp"
+        android:background="@drawable/background_toolbar">
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:text="个人信息"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:singleLine="true"
+            android:textColor="@color/BLACK"
+            android:textSize="20sp" />
+    </android.support.v7.widget.Toolbar>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:padding="10dp"
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+
+            <TextView
+                android:text="昵称"
+                android:textSize="@dimen/l_text_size"
+                android:textColor="@color/BLACK"
+                android:gravity="center"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:id="@+id/edit_init_userNickname"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:hint="点击修改"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <LinearLayout
+            android:padding="10dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+
+            <TextView
+                android:text="个性签名"
+                android:textSize="@dimen/l_text_size"
+                android:textColor="@color/BLACK"
+                android:gravity="center"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:id="@+id/edit_init_userSign"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:hint="点击修改"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <LinearLayout
+            android:padding="10dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+
+            <TextView
+                android:text="性别"
+                android:textSize="@dimen/l_text_size"
+                android:textColor="@color/BLACK"
+                android:gravity="center"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/edit_init_userSex"
+                android:text="点击修改"
+                android:textSize="@dimen/n_text_size"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <LinearLayout
+            android:padding="10dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+
+            <TextView
+                android:text="部门"
+                android:textSize="@dimen/l_text_size"
+                android:textColor="@color/BLACK"
+                android:gravity="center"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/edit_init_userDepart"
+                android:text="点击修改"
+                android:textSize="@dimen/n_text_size"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_sign_init_user"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="34dp"
+            android:layout_marginRight="34dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="30dp"
+            android:text="进入应用"
+            android:textColor="#2f7cd6"
+            android:textSize="@dimen/s_text_size"
+            android:background="@drawable/background_button"/>
+    </LinearLayout>
+
+</LinearLayout>
