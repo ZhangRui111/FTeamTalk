@@ -361,7 +361,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
             mQueue = Volley.newRequestQueue(getActivity());
         }
 
-        String urlUpdateIcon = "http://211.83.107.1:8037/TeamTalk/uploadHead.action?username=" + "123" + "&userhead=" + bitmap64;
+        String urlUpdateIcon = "http://115.28.66.165:8080/uploadHead.action?username=" + "123" + "&userhead=" + bitmap64;
 
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urlUpdateIcon, new Response.Listener<String>() {
             @Override
@@ -413,7 +413,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                     mQueue = Volley.newRequestQueue(getActivity());
                 }
 
-                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://211.83.107.1:8037/TeamTalk/updateInfo.action?username="
+                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://115.28.66.165:8080/updateInfo.action?username="
                         + userInfoStatic.getUsername() + "&nickname" + userName + "&type=0", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
@@ -472,7 +472,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                 }
 
                 final String finalDepart = depart;
-                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://211.83.107.1:8037/TeamTalk/updateInfo.action?username="
+                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://115.28.66.165:8080/updateInfo.action?username="
                         + userInfoStatic.getUsername() + "&depart" + depart + "&type=2", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {

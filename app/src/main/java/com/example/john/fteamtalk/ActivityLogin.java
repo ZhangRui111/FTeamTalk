@@ -250,7 +250,7 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         final String passwordTmp = password;
 
 
-        String urllogin = "http://211.83.107.1:8037/TeamTalk/login.action?username=" + phoneTmp + "&password=" + passwordTmp;
+        String urllogin = "http://115.28.66.165:8080/login.action?username=" + phoneTmp + "&password=" + passwordTmp;
 
         //提示正在登陆
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityLogin.this, R.style.MyAlertDialogStyle);

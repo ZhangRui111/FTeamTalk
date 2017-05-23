@@ -15,6 +15,7 @@ import android.provider.ContactsContract;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -46,6 +47,8 @@ import net.qiujuer.genius.ui.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_CAMERO;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
@@ -81,6 +84,10 @@ public class ActivityMain extends BaseActivity
 
     //dialog
     private AlertDialog dialog;
+
+    //
+    private Timer timer;
+    private TimerTask msgTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,6 +214,12 @@ public class ActivityMain extends BaseActivity
 
         //funcGetContact();
         //initUserInfo();
+        timer = new Timer();
+
+        msgTask = new receiveMsgTask();
+
+        timer.schedule(msgTask,0,10*1000);//0毫秒后每2分钟执行该任务一次
+        //timer.schedule(msgTask,1*60*1000);//1分钟后执行该任务一次
     }
 
     @Override
@@ -351,6 +364,11 @@ public class ActivityMain extends BaseActivity
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        msgTask.cancel();
+    }
 
     private void initUserInfo() {
         String urllogin = "http://211.83.107.1:8037/TeamTalk/initInfo.action?username=" +   "&password=";
@@ -435,7 +453,7 @@ public class ActivityMain extends BaseActivity
                     mQueue = Volley.newRequestQueue(ActivityMain.this);
                 }
 
-                StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, "http://211.83.107.1:8037/TeamTalk/updateInfo.action?username="
+                StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, "http://115.28.66.165:8080/updateInfo.action?username="
                         + userInfoStatic.getUsername() + "&signature" + userSign + "&type=1", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
@@ -455,6 +473,39 @@ public class ActivityMain extends BaseActivity
             }
         });
         builder.create().show();
+    }
+
+    public class receiveMsgTask extends TimerTask {
+        @Override
+        public void run() {
+            //任务代码写在此处
+            //Toast.makeText(ActivityMain.this, "msg", Toast.LENGTH_SHORT).show();
+
+            //初始化一个网络请求队列
+            if (mQueue == null) {
+                mQueue = Volley.newRequestQueue(ActivityMain.this);
+            }
+
+            String urlReceiveMsg = "http://115.28.66.165:8080/receiveMessage.action?username=" + userInfoStatic.getUsername() ;
+
+            StringRequest loginRequest = new StringRequest(Request.Method.POST, urlReceiveMsg, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    Log.i("TTT",s);
+                    Gson gson = new Gson();
+                    DataReceiveMessage data;
+                    data = gson.fromJson(s,DataReceiveMessage.class);
+                    Log.i("TTT","msg:" + data.getMsg());
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+
+                }
+            });
+
+            mQueue.add(loginRequest);
+        }
     }
 
     /**

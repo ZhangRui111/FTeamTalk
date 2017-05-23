@@ -104,7 +104,7 @@ public class ActivityContact extends BaseActivity {
             mQueue = Volley.newRequestQueue(ActivityContact.this);
         }
 
-        StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://211.83.107.1:8037/TeamTalk/RequestAddFriend.action?username="
+        StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://115.28.66.165:8080/RequestAddFriend.action?username="
                 + userInfoStatic.getUsername() + "&friendName" + friendname, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {

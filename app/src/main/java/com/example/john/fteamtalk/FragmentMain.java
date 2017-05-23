@@ -328,7 +328,7 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
             mQueue = Volley.newRequestQueue(getActivity());
         }
 
-        String urlNewFriend = "http://211.83.107.1:8037/TeamTalk/VerifyFriend.action?username=" + myNickName + "&friendName=" + otherNickName;
+        String urlNewFriend = "http://115.28.66.165:8080/VerifyFriend.action?username=" + myNickName + "&friendName=" + otherNickName;
 
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urlNewFriend, new Response.Listener<String>() {
             @Override

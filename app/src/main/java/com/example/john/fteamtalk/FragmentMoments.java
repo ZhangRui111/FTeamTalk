@@ -47,14 +47,42 @@ public class FragmentMoments extends Fragment {
     }
 
     private void initView() {
+        final int[] i = {0};
         getMsgBtn = (Button) view.findViewById(R.id.button);
         getMsgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //funcGetMsg();
-                funcInitInfo();
+                //funcInitInfo();
+                funcTest(i[0]);
+                i[0]++;
             }
         });
+    }
+
+    private void funcTest(int i) {
+
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(getActivity());
+        }
+
+        String urlNewMsg = "http://115.28.66.165:8080/SendMessage.action?username=" + "gyh" + "&friendName=" + "123" + "&message" +
+                "hello" + i +"&time" + "201705121123";
+
+
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlNewMsg, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Toast.makeText(getActivity(), "OK" + s, Toast.LENGTH_SHORT).show();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        });
+
+        mQueue.add(loginRequest);
     }
 
     private void initPermission() {
@@ -69,36 +97,13 @@ public class FragmentMoments extends Fragment {
 
     }
 
-    private void funcGetMsg() {
-        if (mQueue == null) {
-            mQueue = Volley.newRequestQueue(getActivity());
-        }
-
-        String urlGetMsg = "http://211.83.107.1:8037/TeamTalk/receiveMessage.action.action?username=" + "gyh";
-
-        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlGetMsg, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                Toast.makeText(getActivity(), "OK" + s, Toast.LENGTH_SHORT).show();
-
-                //handler.sendEmptyMessage(HANDLER_NEW_FRIEND);//发送消失到handler，通知主线程修改昵称成功
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-
-            }
-        });
-
-        mQueue.add(loginRequest);
-    }
 
     private void funcInitInfo() {
         if (mQueue == null) {
             mQueue = Volley.newRequestQueue(getActivity());
         }
 
-        String urlChangeNickname = "http://211.83.107.1:8037/TeamTalk/updateInfo.action?username=" + "123" +
+        String urlChangeNickname = "http://115.28.66.165:8080/updateInfo.action?username=" + "123" +
                 "&type=" + "0" + "&nickname=" + "1234";
 
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urlChangeNickname, new Response.Listener<String>() {
