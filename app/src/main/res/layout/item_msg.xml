@@ -21,10 +21,18 @@
             android:id="@+id/left_msg"
             android:gravity="center"
             android:layout_margin="10dp"
+            android:padding="2dp"
             android:textColor="#fff"
             android:background="@drawable/left_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/left_sendPic"
+            android:visibility="gone"
+            android:gravity="center"
+            android:layout_margin="10dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -34,10 +42,19 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content">
 
+        <ImageView
+            android:id="@+id/right_sendPic"
+            android:visibility="gone"
+            android:gravity="center"
+            android:layout_margin="10dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
         <TextView
             android:id="@+id/right_msg"
             android:gravity="center"
             android:layout_margin="10dp"
+            android:padding="2dp"
+            android:visibility="visible"
             android:background="@drawable/right_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

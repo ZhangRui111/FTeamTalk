@@ -3,19 +3,20 @@ package com.example.john.fteamtalk;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PersistableBundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,21 +27,32 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.jph.takephoto.app.TakePhoto;
+import com.jph.takephoto.app.TakePhotoActivity;
+import com.jph.takephoto.compress.CompressConfig;
+import com.jph.takephoto.model.CropOptions;
+import com.jph.takephoto.model.TResult;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.john.fteamtalk.UtilsFinalArguments.imagePicPath;
+import static com.example.john.fteamtalk.UtilsLibrary.bitmapToBase64;
+import static com.example.john.fteamtalk.UtilsLibrary.decodeFileUtils;
 
 /**
  * Created by john on 2017/5/8.
  */
 
-public class ActivityChatWindow extends AppCompatActivity implements View.OnClickListener {
+public class ActivityChatWindow extends TakePhotoActivity implements View.OnClickListener {
 
     private Toolbar toolbar;
     private String userNickName;
     private int userId;
     private TextView toolbarTitle;
     private Button sendBtn;
+    private ImageButton sendPicBtn;
     private EditText msgEdt;
 
     private AdapterChatMessage chatAdapter;
@@ -48,6 +60,13 @@ public class ActivityChatWindow extends AppCompatActivity implements View.OnClic
     private List<DataChatMessage> personChats = new ArrayList<>();
 
     private RequestQueue mQueue;
+
+    //TakePhoto
+    private TakePhoto takePhoto;
+    private CompressConfig compressConfig;
+    private File file;
+    private Uri imagePicUri;
+    private String picStr;
 
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
@@ -86,6 +105,7 @@ public class ActivityChatWindow extends AppCompatActivity implements View.OnClic
         sendBtn = (Button) findViewById(R.id.btn_chat_message_send);
         msgEdt = (EditText) findViewById(R.id.et_chat_message);
         lv_chat_listView = (ListView) findViewById(R.id.lv_chat_dialog);
+        sendPicBtn = (ImageButton) findViewById(R.id.picBtn);
     }
 
     private void initData() {
@@ -96,6 +116,12 @@ public class ActivityChatWindow extends AppCompatActivity implements View.OnClic
         toolbarTitle.setText(userNickName);
 
         chatAdapter = new AdapterChatMessage(this,R.layout.item_msg,personChats);
+        //takePhoto
+        takePhoto = getTakePhoto();  //初始化TakePhoto对象
+        //cropOptions = new CropOptions.Builder().setAspectX(1).setAspectY(1).setWithOwnCrop(false).create();  //设置裁剪参数
+        compressConfig=new CompressConfig.Builder().setMaxSize(50*1024).setMaxPixel(800).create();  //设置压缩参数
+        takePhoto.onEnableCompress(compressConfig,true);  //设置为需要压缩
+
     }
 
     private void initClickEvent() {
@@ -107,6 +133,7 @@ public class ActivityChatWindow extends AppCompatActivity implements View.OnClic
         });
 
         sendBtn.setOnClickListener(this);
+        sendPicBtn.setOnClickListener(this);
     }
 
 
@@ -119,17 +146,44 @@ public class ActivityChatWindow extends AppCompatActivity implements View.OnClic
                     return;
                 }
                 String content = msgEdt.getText().toString();
-                DataChatMessage msg = new DataChatMessage(userId,userNickName,content,DataChatMessage.TYPE_SEND);
+                DataChatMessage msg = new DataChatMessage(userId,userNickName,content,DataChatMessage.TYPE_SEND,DataChatMessage.IF_PIC_NO,"");
                 personChats.add(msg);
                 chatAdapter.notifyDataSetChanged(); //当有新消息的时候，刷新ListView中的显示
                 lv_chat_listView.setSelection(personChats.size());  //将ListView定位到最后一行
                 msgEdt.setText(""); //清空输入框的内容
                 funcSendMsgToFriend("123","gyh",content);
                 break;
+            case R.id.picBtn:
+                takePhoto.onPickFromGallery();
+                break;
             default:
                 break;
         }
     }
+
+    //选择头像，从相册/拍照成功返回
+    @Override
+    public void takeSuccess(TResult result) {
+        super.takeSuccess(result);
+        //图片本地路径
+        imagePicPath = result.getImage().getOriginalPath();
+        Toast.makeText(this, "pic:" + imagePicPath, Toast.LENGTH_SHORT).show();
+        funcSendPicToFri(imagePicPath);
+    }
+
+    //发送图片，从相册/拍照调用失败
+    @Override
+    public void takeFail(TResult result, String msg) {
+        super.takeFail(result, msg);
+    }
+
+    //发送图片，从相册/拍照调用取消
+    @Override
+    public void takeCancel() {
+        super.takeCancel();
+    }
+
+
 
     private void funcSendMsgToFriend(String nickname, String friendName, String msg) {
         //初始化一个网络请求队列
@@ -156,16 +210,26 @@ public class ActivityChatWindow extends AppCompatActivity implements View.OnClic
         mQueue.add(loginRequest);
     }
 
+    private void funcSendPicToFri(String path) {
+        picStr = bitmapToBase64(decodeFileUtils(path));
+        Log.i("TAGPIC",picStr);
+
+        DataChatMessage msg = new DataChatMessage(userId,userNickName,"",DataChatMessage.TYPE_SEND,DataChatMessage.IF_PIC_YES, path);
+        personChats.add(msg);
+        chatAdapter.notifyDataSetChanged(); //当有新消息的时候，刷新ListView中的显示
+        lv_chat_listView.setSelection(personChats.size());  //将ListView定位到最后一行
+    }
+
     private void initSend() {
         /**
          * 虚拟3条发送方的消息
          */
         DataChatMessage msg;
-        msg = new DataChatMessage(userId,userNickName,"Hello guy",DataChatMessage.TYPE_RECEIVED);
+        msg = new DataChatMessage(userId,userNickName,"Hello guy",DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
         personChats.add(msg);
-        msg = new DataChatMessage(userId,userNickName,"Hello.Who is that?",DataChatMessage.TYPE_SEND);
+        msg = new DataChatMessage(userId,userNickName,"Hello.Who is that?",DataChatMessage.TYPE_SEND,DataChatMessage.IF_PIC_NO,"");
         personChats.add(msg);
-        msg = new DataChatMessage(userId,userNickName,"This is Tom.Nice talking to you.",DataChatMessage.TYPE_RECEIVED);
+        msg = new DataChatMessage(userId,userNickName,"This is Tom.Nice talking to you.",DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
         personChats.add(msg);
         lv_chat_listView.setAdapter(chatAdapter);
     }

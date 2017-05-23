@@ -32,6 +32,7 @@ public class UtilsFinalArguments {
     //用户信息
     public static Boolean isPicLocal = false;  //头像是否保存到了本地
     public static String iconPath;  //用户头像本地地址
+    public static String imagePicPath;  //发送图片的本地地址
 
     public static Boolean ifBackLive = false;  //应用退出时是否后台运行
     public static Boolean ifValid = false;  //用户是否勾选了不再提醒

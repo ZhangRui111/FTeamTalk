@@ -7,6 +7,16 @@ public class DataChatMessage {
 
     public static final int TYPE_RECEIVED = 0;
     public static final int TYPE_SEND = 1;
+    public static final int IF_PIC_YES = 2;
+    public static final int IF_PIC_NO = 3;
+    /**
+     * 是否是图片
+     */
+    private int ifPic;
+    /**
+     * 图片path
+     */
+    private String path;
     /**
      * id
      */
@@ -25,11 +35,13 @@ public class DataChatMessage {
      */
     private int type;
 
-    public DataChatMessage(int id, String name, String chatMessage, int type) {
+    public DataChatMessage(int id, String name, String chatMessage, int type, int ifPic, String path) {
         this.id = id;
         this.name = name;
         this.chatMessage = chatMessage;
         this.type = type;
+        this.ifPic = ifPic;
+        this.path = path;
     }
 
     public int getId() {
@@ -46,5 +58,13 @@ public class DataChatMessage {
 
     public int getType() {
         return type;
+    }
+
+    public int getIfPic() {
+        return ifPic;
+    }
+
+    public String getPath() {
+        return path;
     }
 }
