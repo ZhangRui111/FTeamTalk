@@ -8,7 +8,8 @@
     <uses-permission android:name="android.permission.CAMERA"/><!--允许调用照相机-->
     <!--<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />--> <!--允许程序访问CellID或WiFi热点来获取粗略的位置-->
     <!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->  <!--允许程序获得精确位置信息-->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" /><!--允许程序读写手机状态和身份-->
+    <!--<uses-permission android:name="android.permission.READ_PHONE_STATE" />--><!--允许程序读写手机状态和身份-->
+    <uses-permission   android:name="android.permission.READ_CONTACTS"/> <!-- 读取联系人权限 -->
 
     <!--直接可用-->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -41,6 +42,8 @@
         <activity android:name=".ActivityChatWindow"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".ActivityContact"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
 
 </manifest>

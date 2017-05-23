@@ -1,29 +1,25 @@
 package com.example.john.fteamtalk;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
 /**
- * Created by john on 2017/5/8.
+ * Created by john on 2017/5/23.
  */
 
-public class AdapterFriendList extends ArrayAdapter<DataFriendInfo> {
+public class AdapterContactList extends ArrayAdapter<DataFriendInfo> {
 
     int resourceId;
     Context mContext;
 
-    public AdapterFriendList(Context context, int resource, List<DataFriendInfo> objects) {
+    public AdapterContactList(Context context, int resource, List<DataFriendInfo> objects) {
         super(context, resource, objects);
         resourceId = resource;
     }
@@ -52,28 +48,8 @@ public class AdapterFriendList extends ArrayAdapter<DataFriendInfo> {
 
         viewHolder.userIdTxv.setText(msg.getUserNickName());
         String departStr = msg.getDepartment();
-        /*String departStr = "";
-        switch (depart) {
-            case 0:
-                departStr = "IT部";
-                break;
-            case 1:
-                departStr = "秘书处";
-                break;
-            case 2:
-                departStr = "后勤部";
-                break;
-            case 3:
-                departStr = "销售部";
-                break;
-            case 4:
-                departStr = "经理部";
-                break;
-            default:
-                break;
-        }*/
-        viewHolder.userDepartment.setText(departStr);
 
+        viewHolder.userDepartment.setText(departStr);
         return view;
     }
 

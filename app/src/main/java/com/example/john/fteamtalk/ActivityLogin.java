@@ -1,8 +1,10 @@
 package com.example.john.fteamtalk;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -45,12 +48,15 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_WRITE_EXTERNAL_STORAGE;
+import static com.example.john.fteamtalk.UtilsFinalArguments.dataList;
+import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
 
 /**
@@ -75,10 +81,10 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
     //网络请求
     private RequestQueue mQueue;
     //Handler
-    Handler handler=new Handler(){
+    Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            if(msg.what==0x123){
-                String pathLocalTmp = Environment.getExternalStorageDirectory().getPath()+"/WeMeet";
+            if (msg.what == 0x123) {
+                String pathLocalTmp = Environment.getExternalStorageDirectory().getPath() + "/WeMeet";
                 String realPathWithName = SavaImage(bitmap, pathLocalTmp);  //返回带有头像文件名的真实本地路径
                 funcWriteSharePreferencesIcon(realPathWithName, ActivityLogin.this);
 
@@ -100,8 +106,8 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
 
         initView();
         initClickEvent();
-        initData();
         initPermission();
+        initData();
     }
 
     private void initView() {
@@ -124,12 +130,8 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
 
 
     private void initData() {
-        //加载用户头像
-        /*iconPath = funcReadSharePreferencesIcon(ActivityLogin.this);
-        //Toast.makeText(this, "" + iconPath, Toast.LENGTH_SHORT).show();
-        if (iconPath != null) {
-            Glide.with(this).load(iconPath).into(userIcon);
-        }*/
+
+        userInfoStatic = new DataUserInfo();
     }
 
 
@@ -157,7 +159,7 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         @Override
         public void onSucceed(int requestCode, List<String> grantedPermissions) {
             // 权限申请成功回调。
-            if(requestCode == REQUEST_WRITE_EXTERNAL_STORAGE) {
+            if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE) {
                 // TODO 相应代码。
                 //do nothing
             }
@@ -181,12 +183,12 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             //登录按钮
             case R.id.button_login:
-                funcCheckInput();
-                //ActivityMain.actionStart(ActivityLogin.this);
-                //overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                //funcCheckInput();
+                ActivityMain.actionStart(ActivityLogin.this);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                 break;
             //密码是否明文显示按钮
             case R.id.Img_btn_hide:
@@ -216,7 +218,7 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         }
         //密文显示
         if (isShowpassword.equals(false)) {
-            passwordInputEdt.setInputType( InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD );
+            passwordInputEdt.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
             hideOrShowPasswordImgBtn.setBackgroundResource(R.mipmap.ic_lock);
         }
         isShowpassword = !isShowpassword;
@@ -232,12 +234,10 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         if (userPhoneInput == null || userPhoneInput.equals("")) {
             Toast.makeText(this, "手机号码不能为空哦", Toast.LENGTH_SHORT).show();
             return;
-        }
-        else if (passwordInput == null || passwordInput.equals("")) {
+        } else if (passwordInput == null || passwordInput.equals("")) {
             Toast.makeText(this, "密码不能为空哦", Toast.LENGTH_SHORT).show();
             return;
-        }
-        else {
+        } else {
             funcConnectAndLogin(userPhoneInput, passwordInput);
         }
 
@@ -257,7 +257,7 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         builder.setTitle("登录中");
         builder.setCancelable(false);
         ProgressBar progressBar = new ProgressBar(ActivityLogin.this);
-        builder.setView(progressBar,20,20,20,20);
+        builder.setView(progressBar, 20, 20, 20, 20);
         dialog = builder.create();
         dialog.show();
 
@@ -271,7 +271,8 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
                 //Log.d("TAG", s);
 
                 Gson gson = new Gson();
-                Toast.makeText(ActivityLogin.this, "OK", Toast.LENGTH_SHORT).show();
+                DataLoginRegister dataLoginRegister = gson.fromJson(s, DataLoginRegister.class);
+
                 //转入主界面
                 ActivityMain.actionStart(ActivityLogin.this);
                 overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
@@ -284,7 +285,6 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
                 dialog.dismiss();
             }
         });
-
         mQueue.add(loginRequest);
         //这里的返回值没有实际意义
         return true;
@@ -299,22 +299,6 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         String realUrl = "http://cmweb.top:3000" + url;
         new Task().execute(realUrl);
     }
-
-/*    *//**
-     * 将用户信息写入SharePreferences保存
-     * @param dataUserInfo
-     *//*
-    private void funcWriteSharePreferences(ResponseDataUserInfo dataUserInfo) {
-
-        SharedPreferences.Editor editor = getSharedPreferences("user_info",MODE_PRIVATE).edit();
-        editor.putInt("id",dataUserInfo.getUser().getId());
-        editor.putString("mobile",dataUserInfo.getUser().getMobile());
-        editor.putInt("gender",dataUserInfo.getUser().getGender());
-        editor.putString("nickname",dataUserInfo.getUser().getNickname());
-        editor.putString("avatar_url",dataUserInfo.getUser().getAvatar_url());
-        editor.putString("auth_token",dataUserInfo.getAuth_token());
-        editor.commit();
-    }*/
 
     /**
      *

@@ -104,7 +104,7 @@ public class AdapterChatMessage extends ArrayAdapter<DataChatMessage> {
     }
 
     private void funcDialog() {
-                final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(
+        final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(
                 getContext(), R.style.MyAlertDialogStyle);
         builder.setCancelable(true);
         final ImageView picImg = new ImageView(getContext());

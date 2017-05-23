@@ -2,13 +2,16 @@ package com.example.john.fteamtalk;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -25,17 +28,30 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.PermissionListener;
 
+import net.qiujuer.genius.ui.widget.EditText;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_CAMERO;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_WRITE_EXTERNAL_STORAGE;
+import static com.example.john.fteamtalk.UtilsFinalArguments.dataList;
+import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 import static com.example.john.fteamtalk.UtilsLibrary.decodeFileUtils;
 
 public class ActivityMain extends BaseActivity
@@ -58,6 +74,13 @@ public class ActivityMain extends BaseActivity
     //nav_header
     private TextView drawerUserNameTxv;  //侧边栏上部姓名
     private ImageView drawerUserIcon;  //侧边栏上部头像
+    private TextView drawerUserSignTxv;  //用户签名
+
+    //网络请求
+    private RequestQueue mQueue;
+
+    //dialog
+    private AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +131,7 @@ public class ActivityMain extends BaseActivity
         View headerLayout = navigationView.getHeaderView(0);   //没有这一行时，drawerUserNameTxv的findviewById的结果是null
         drawerUserNameTxv = (TextView) headerLayout.findViewById(R.id.txt_name_header);
         drawerUserIcon = (ImageView) headerLayout.findViewById(R.id.imageView_user_icon_header);
+        drawerUserSignTxv = (TextView) headerLayout.findViewById(R.id.txt_sign);
     }
 
     private void initPermission() {
@@ -167,25 +191,31 @@ public class ActivityMain extends BaseActivity
     private void initClickEvent() {
         drawerUserNameTxv.setOnClickListener(this);
         drawerUserIcon.setOnClickListener(this);
+        drawerUserSignTxv.setOnClickListener(this);
     }
 
     private void initData() {
         //加载第一个Fragment
         FragmentTransaction mFragmentTransaction = mFragmentManager.beginTransaction();
-        if(fragmentMain == null){
-            fragmentMain = new FragmentMain();
-            mFragmentTransaction.replace(R.id.main_fragment_layout,fragmentMain);
+        if(fragmentMoments == null){
+            fragmentMoments = new FragmentMoments();
+            mFragmentTransaction.replace(R.id.main_fragment_layout,fragmentMoments);
         }else{
-            mFragmentTransaction.show(fragmentMain);
+            mFragmentTransaction.show(fragmentMoments);
         }
         mFragmentTransaction.commit();
+
+        //funcGetContact();
+        //initUserInfo();
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.txt_name_header:
+            case R.id.txt_sign:
                 //doSomething
+                funcEditUsserSign();
                 break;
             case R.id.imageView_user_icon_header:
                 //doSomething
@@ -321,6 +351,46 @@ public class ActivityMain extends BaseActivity
         }
     }
 
+
+    private void initUserInfo() {
+        String urllogin = "http://211.83.107.1:8037/TeamTalk/initInfo.action?username=" +   "&password=";
+
+        //提示正在登陆
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityMain.this, R.style.MyAlertDialogStyle);
+        builder.setTitle("更新用户信息");
+        builder.setCancelable(false);
+        ProgressBar progressBar = new ProgressBar(ActivityMain.this);
+        builder.setView(progressBar,20,20,20,20);
+        dialog = builder.create();
+        dialog.show();
+
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(ActivityMain.this);
+        }
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urllogin, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                //Log.d("TAG", s);
+
+                Gson gson = new Gson();
+                DataLoginRegister dataLoginRegister = gson.fromJson(s,DataLoginRegister.class);
+
+                //转入主界面
+                ActivityMain.actionStart(ActivityMain.this);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                dialog.dismiss();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(ActivityMain.this, "密码或者用户名错误！", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+        mQueue.add(loginRequest);
+    }
+
     /**
      * 设置nav_header的头像和昵称
      * @param name
@@ -337,6 +407,54 @@ public class ActivityMain extends BaseActivity
             drawerUserNameTxv.setText(name);
             drawerUserIcon.setImageBitmap(decodeFileUtils(iconPath));
         }
+    }
+
+    private void funcEditUsserSign() {
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityMain.this, R.style.MyAlertDialogStyle);
+        builder.setTitle("Change your Signature");
+        final EditText input = new EditText(this);
+        input.setSingleLine();
+        //自定义EditText颜色
+        input.setBackgroundResource(R.drawable.edittext_input_line);
+        //input.setText(ActivityLogin.cosmicUserInfo.getNickname());
+        builder.setView(input,20,20,20,20);;
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                final String userSign = input.getText().toString();
+
+                //网络Http修改昵称
+                if (mQueue == null) {
+                    mQueue = Volley.newRequestQueue(ActivityMain.this);
+                }
+
+                StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, "http://211.83.107.1:8037/TeamTalk/updateInfo.action?username="
+                        + userInfoStatic.getUsername() + "&signature" + userSign + "&type=1", new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        drawerUserSignTxv.setText(userSign);
+                        userInfoStatic.setSignature(userSign);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        Toast.makeText(ActivityMain.this, "签名更改失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                mQueue.add(modifyPasswordRequest);
+
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
     }
 
     /**

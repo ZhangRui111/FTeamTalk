@@ -70,6 +70,7 @@ import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.iconPath;
 import static com.example.john.fteamtalk.UtilsFinalArguments.ifBackLive;
 import static com.example.john.fteamtalk.UtilsFinalArguments.ifValid;
+import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 import static com.example.john.fteamtalk.UtilsLibrary.bitmapToBase64;
 import static com.example.john.fteamtalk.UtilsLibrary.decodeFileUtils;
 
@@ -90,8 +91,8 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
     private android.widget.ImageView userIconUIImg;
     private TextView userNameTxv;  //用户昵称显示区
     private android.widget.Button modifyNameBtn;  //修改用户昵称Button
-    private TextView userGenderTxv;  //用户性别显示区
-    private android.widget.Button modifyGenderBtn;  //修改用户性别
+    private TextView userGenderTxv;  //用户部门显示区
+    private android.widget.Button modifyGenderBtn;  //修改用户部门
     private android.widget.Button modifyPasswordBtn;  //修改密码按钮
     private TextView logOffTxv;  //退出登录
 
@@ -114,7 +115,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
     private RequestQueue mQueue;
     private AlertDialog waitingDialog;  //等待提示AlertDialog
 
-    public Handler handler = new Handler() {
+    /*public Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what){
@@ -144,23 +145,11 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                     }
                     Toast.makeText(getActivity(), "昵称更改失败", Toast.LENGTH_SHORT).show();
                     break;
-                case HANDLER_USER_GENDER:
-                    if (waitingDialog.isShowing()) {
-                        waitingDialog.dismiss();
-                    }
-                    userGenderTxv.setText(userSex);
-                    break;
-                case HANDLER_USER_GENDER_ERROR:
-                    if (waitingDialog.isShowing()) {
-                        waitingDialog.dismiss();
-                    }
-                    Toast.makeText(getActivity(), "性别更改失败", Toast.LENGTH_SHORT).show();
-                    break;
                 default:
                     break;
             }
         }
-    };
+    };*/
 
     @Nullable
     @Override
@@ -276,7 +265,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                 break;
             case R.id.item_layout_setting_sex:
             case R.id.btn_sex_un:
-                funcChooseGender();
+                funcChooseDepart();
                 break;
             case R.id.item_layout_password_setting:
             case R.id.btn_setting_password_un:
@@ -371,15 +360,14 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
         if (mQueue == null) {
             mQueue = Volley.newRequestQueue(getActivity());
         }
-        Toast.makeText(getActivity(), "64:" + bitmap64, Toast.LENGTH_SHORT).show();
 
         String urlUpdateIcon = "http://211.83.107.1:8037/TeamTalk/uploadHead.action?username=" + "123" + "&userhead=" + bitmap64;
 
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urlUpdateIcon, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                Toast.makeText(getActivity(), "OK" + s, Toast.LENGTH_SHORT).show();
-
+                ((ActivityMain) getActivity()).funcSetNavHeader(null,iconPath);
+                userIconUIImg.setImageBitmap(decodeFileUtils(iconPath));
                 //handler.sendEmptyMessage(HANDLER_USER_ICON);//发送消失到handler，通知主线程修改昵称成功
             }
         }, new Response.ErrorListener() {
@@ -401,43 +389,116 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
      * 弹出Dialog设置用户昵称nickname
      */
     private void funcSetNickname() {
-        Toast.makeText(getActivity(), "funcSetNickname", Toast.LENGTH_SHORT).show();
+        final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
+        builder.setTitle("Change your NickName");
+        final EditText input = new EditText(getActivity());
+        input.setSingleLine();
+        //自定义EditText颜色
+        input.setBackgroundResource(R.drawable.edittext_input_line);
+        builder.setView(input,20,20,20,20);;
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
 
+                userName = input.getText().toString();
 
+                //网络Http修改昵称
+                if (mQueue == null) {
+                    mQueue = Volley.newRequestQueue(getActivity());
+                }
+
+                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://211.83.107.1:8037/TeamTalk/updateInfo.action?username="
+                        + userInfoStatic.getUsername() + "&nickname" + userName + "&type=0", new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+
+                        userNameTxv.setText(userName);
+                        ((ActivityMain) getActivity()).funcSetNavHeader(userName,null);
+
+                        userInfoStatic.setNickname(userName);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        Toast.makeText(getActivity(), "昵称更改失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                mQueue.add(setNicknameRequest);
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     /**
-     * 上传用户昵称
-     * @param data
+     * 弹出Dialog选择部门
      */
-    private void funcUploadUserNickName(String data) {
+    private void funcChooseDepart() {
+        final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
+        builder.setTitle("Change your Department");
+        builder.setItems(new String[]{"IT部", "秘书处", "后勤部", "经理部", "销售部"}, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String depart = "";
+                switch (i) {
+                    case 0:
+                        depart = "IT部";
+                        break;
+                    case 1:
+                        depart = "秘书处";
+                        break;
+                    case 2:
+                        depart = "后勤部";
+                        break;
+                    case 3:
+                        depart = "经理部";
+                        break;
+                    case 4:
+                        depart = "销售部";
+                        break;
+                    default:
+                        break;
+                }
+                 //网络Http修改昵称
+                if (mQueue == null) {
+                    mQueue = Volley.newRequestQueue(getActivity());
+                }
 
+                final String finalDepart = depart;
+                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://211.83.107.1:8037/TeamTalk/updateInfo.action?username="
+                        + userInfoStatic.getUsername() + "&depart" + depart + "&type=2", new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
 
-    }
+                        userGenderTxv.setText(finalDepart);
 
-    /**
-     * 弹出Dialog选择性别
-     */
-    private void funcChooseGender() {
+                        userInfoStatic.setDepartment(finalDepart);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        Toast.makeText(getActivity(), "部门更改失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-        Toast.makeText(getActivity(), "funcChooseGender", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 上传修改用户性别
-     */
-    private void funcUploadUserGender() {
-        //网络Http修改昵称
-
+                mQueue.add(setNicknameRequest);
+            }
+        });
+        builder.create().show();
     }
 
     /**
      * 登出
      */
     private void funcLogOff() {
-
         ActivityCollector.finishAll();
-
     }
 
     /**

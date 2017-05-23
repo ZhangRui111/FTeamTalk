@@ -1,12 +1,17 @@
 package com.example.john.fteamtalk;
 
+import android.Manifest;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -31,11 +36,17 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.gson.Gson;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.PermissionListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.john.fteamtalk.UtilsFinalArguments.HANDLER_NEW_FRIEND;
+import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_READ_CONTACT;
+import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
+import static com.example.john.fteamtalk.UtilsFinalArguments.contactList;
+import static com.example.john.fteamtalk.UtilsFinalArguments.dataList;
 
 /**
  * Created by john on 2017/3/22.
@@ -52,8 +63,8 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
     private AlertDialog waitingDialog;
 
     //data
-    private List<DataFriendInfo> dataList;
     private AdapterFriendList myAdapter;
+    private Boolean flag = true;
 
     //Quene
     private RequestQueue mQueue;
@@ -62,9 +73,6 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
-                case HANDLER_NEW_FRIEND:
-                    waitingDialog.dismiss();
-                    break;
                 default:
                     break;
             }
@@ -91,38 +99,19 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
     private void initData() {
         dataList = new ArrayList<>();
         DataFriendInfo tmpData;
-        tmpData = new DataFriendInfo(0,"小张",0);
+        int i = 0;
+        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
         dataList.add(tmpData);
-        tmpData = new DataFriendInfo(1,"小李",1);
+        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
         dataList.add(tmpData);
-        tmpData = new DataFriendInfo(2,"小妞",2);
+        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
         dataList.add(tmpData);
-        tmpData = new DataFriendInfo(3,"小杨",3);
+        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
         dataList.add(tmpData);
-        tmpData = new DataFriendInfo(4,"小朱",4);
+        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
         dataList.add(tmpData);
-        tmpData = new DataFriendInfo(5,"小赵",3);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(6,"小孙",2);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(7,"小钱",1);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(8,"小周",0);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(9,"小王",0);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(10,"小朱",4);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(11,"小赵",3);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(12,"小孙",2);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(13,"小钱",1);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(14,"小周",0);
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(15,"小王",0);
-        dataList.add(tmpData);
+
+        contactList = new ArrayList<>();  //通讯录
     }
 
     private void initView() {
@@ -150,8 +139,47 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
     }
 
     private void initPermission() {
-
+        if (!AndPermission.hasPermission(getActivity(), Manifest.permission.READ_CONTACTS)) {
+            // 申请权限。
+            AndPermission.with(this)
+                    .requestCode(REQUEST_READ_CONTACT)
+                    .permission(Manifest.permission.READ_CONTACTS)
+                    .send();
+        }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        // 只需要调用这一句，其它的交给AndPermission吧，最后一个参数是PermissionListener。
+        AndPermission.onRequestPermissionsResult(requestCode, permissions, grantResults, listener);
+    }
+
+    private PermissionListener listener = new PermissionListener() {
+        @Override
+        public void onSucceed(int requestCode, List<String> grantedPermissions) {
+            // 权限申请成功回调。
+            if(requestCode == REQUEST_READ_CONTACT) {
+                // TODO 相应代码。
+                //do nothing
+            }
+        }
+
+        @Override
+        public void onFailed(int requestCode, List<String> deniedPermissions) {
+            // 权限申请失败回调。
+
+            // 用户否勾选了不再提示并且拒绝了权限，那么提示用户到设置中授权。
+            if (AndPermission.hasAlwaysDeniedPermission(getActivity(), deniedPermissions)) {
+
+                // 第二种：用自定义的提示语。
+                AndPermission.defaultSettingDialog(getActivity(), REQUEST_USUAL)
+                        .setTitle("权限申请失败")
+                        .setMessage("我们需要的一些权限被您拒绝或者系统发生错误申请失败，请您到设置页面手动授权，否则功能无法正常使用！")
+                        .setPositiveButton("好，去设置")
+                        .show();
+            }
+        }
+    };
 
     private void initClickEvent() {
         fabNewFriendStory.setOnClickListener(this);
@@ -165,7 +193,9 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
                 funcNewFriend();
                 break;
             case R.id.fa_flash_btn:
-                Toast.makeText(getActivity(), "刷新", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "刷新", Toast.LENGTH_SHORT).show();
+                ActivityContact.actionStart(getActivity());
+                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                 break;
             default:
                 break;
@@ -173,7 +203,19 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
     }
 
     private void funcNewFriend() {
-        final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
+
+        //提示正在登陆
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
+        builder.setTitle("准备通讯录数据");
+        builder.setCancelable(false);
+        ProgressBar progressBar = new ProgressBar(getActivity());
+        builder.setView(progressBar, 20, 20, 20, 20);
+        waitingDialog = builder.create();
+        waitingDialog.show();
+        new ContactTask().execute();
+
+
+        /*final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
         builder.setTitle("Find a new friend");
 
         final LinearLayout newFriendLinlay= new LinearLayout(getActivity());
@@ -210,7 +252,7 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
                     @Override
                     public void run() {
                         //在子线程中进行网络请求
-                        funcIfExist("123",friendName);  /*用户真实昵称需要更改这里*/
+                        funcIfExist("123",friendName);  *//*用户真实昵称需要更改这里*//*
                     }
                 }.start();
 
@@ -227,7 +269,57 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
             }
         });
         AlertDialog dialog = builder.create();
-        dialog.show();
+        dialog.show();*/
+    }
+
+    class ContactTask extends AsyncTask<String, Integer, Void> {
+
+        protected Void doInBackground(String... params) {
+            if(flag == true) {
+                DataFriendInfo tmpData;
+                int i = 0;
+
+                ContentResolver cr = getActivity().getContentResolver();
+                //取得电话本中开始一项的光标
+                Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+                //向下移动光标
+                while(cursor.moveToNext())
+                {
+                    //取得联系人名字
+                    int nameFieldColumnIndex = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
+                    String contact = cursor.getString(nameFieldColumnIndex);
+
+                    //取得电话号码
+                    String ContactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                    Cursor phone = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + ContactId, null, null);
+
+                    if(phone != null) {
+                        while(phone.moveToNext())
+                        {
+                            String PhoneNumber = phone.getString(phone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                            //格式化手机号
+                            PhoneNumber = PhoneNumber.replace("-","");
+                            PhoneNumber = PhoneNumber.replace(" ","");
+
+                            tmpData = new DataFriendInfo(i++,contact,PhoneNumber);
+                            contactList.add(tmpData);
+                        }
+                    }
+                }
+                flag = false;
+            }
+
+            return null;
+        }
+
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            waitingDialog.dismiss();
+            //Toast.makeText(getActivity(), "OK", Toast.LENGTH_SHORT).show();
+            ActivityContact.actionStart(getActivity());
+            getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+        }
+
     }
 
     private void funcIfExist(String myNickName, String otherNickName) {

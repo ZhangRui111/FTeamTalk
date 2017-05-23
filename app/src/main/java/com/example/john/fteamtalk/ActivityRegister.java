@@ -168,10 +168,17 @@ public class ActivityRegister extends BaseActivity implements View.OnClickListen
         final String phoneTmp = phoneInputString;
         final String passwordTmp = passwordInputString;
 
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(ActivityRegister.this);
+        }
+
+        String urllogin = "http://211.83.107.1:8037/TeamTalk/login.action?username=" + phoneTmp + "&password=" + passwordTmp;
 
         //提示正在登陆
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityRegister.this, R.style.MyAlertDialogStyle);
         builder.setTitle("登录中");
+        builder.setCancelable(false);
         ProgressBar progressBar = new ProgressBar(ActivityRegister.this);
         builder.setView(progressBar,20,20,20,20);
         dialog = builder.create();
@@ -181,14 +188,13 @@ public class ActivityRegister extends BaseActivity implements View.OnClickListen
         if (mQueue == null) {
             mQueue = Volley.newRequestQueue(ActivityRegister.this);
         }
-
-        String urlregister = "http://211.83.107.1:8037/TeamTalk/login.action?username=" + phoneTmp + "&password=" + passwordTmp;
-
-        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlregister, new Response.Listener<String>() {
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urllogin, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                Log.d("INFON", s);
+                //Log.d("TAG", s);
+
                 Gson gson = new Gson();
+                DataLoginRegister dataLoginRegister = gson.fromJson(s,DataLoginRegister.class);
 
                 //转入主界面
                 ActivityMain.actionStart(ActivityRegister.this);
@@ -198,11 +204,10 @@ public class ActivityRegister extends BaseActivity implements View.OnClickListen
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(ActivityRegister.this, "用户名已存在", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ActivityRegister.this, "密码或者用户名错误！", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
             }
         });
-
         mQueue.add(loginRequest);
     }
 

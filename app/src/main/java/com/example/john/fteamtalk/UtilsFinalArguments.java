@@ -15,6 +15,7 @@ public class UtilsFinalArguments {
     public static final int REQUEST_CAMERO = 101;   //调用相机权限
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 102;
     public static final int REQUEST_READ_EXTERNAL_STORAGE = 103;
+    public static final int REQUEST_READ_CONTACT = 104;
 
 
     //handler
@@ -37,4 +38,11 @@ public class UtilsFinalArguments {
     public static Boolean ifBackLive = false;  //应用退出时是否后台运行
     public static Boolean ifValid = false;  //用户是否勾选了不再提醒
     public static Boolean ifAnonymous = false;  //保存ifAnonymousCBox的值，表示是否匿名
+
+    //好友列表
+    public static List<DataFriendInfo> dataList;
+    public static List<DataFriendInfo> contactList;
+
+    //用户信息
+    public static DataUserInfo userInfoStatic;
 }

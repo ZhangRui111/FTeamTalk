@@ -7,9 +7,9 @@ package com.example.john.fteamtalk;
 public class DataFriendInfo {
     private int userId;
     private String userNickName;
-    private int department;
+    private String department;
 
-    public DataFriendInfo(int userId, String userNickName, int department) {
+    public DataFriendInfo(int userId, String userNickName, String department) {
         this.userId = userId;
         this.department = department;
         this.userNickName = userNickName;
@@ -31,11 +31,11 @@ public class DataFriendInfo {
         this.userNickName = userNickName;
     }
 
-    public int getDepartment() {
+    public String getDepartment() {
         return department;
     }
 
-    public void setDepartment(int department) {
+    public void setDepartment(String department) {
         this.department = department;
     }
 }
