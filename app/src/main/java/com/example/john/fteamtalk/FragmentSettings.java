@@ -70,6 +70,7 @@ import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.iconPath;
 import static com.example.john.fteamtalk.UtilsFinalArguments.ifBackLive;
 import static com.example.john.fteamtalk.UtilsFinalArguments.ifValid;
+import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 import static com.example.john.fteamtalk.UtilsLibrary.bitmapToBase64;
 import static com.example.john.fteamtalk.UtilsLibrary.decodeFileUtils;
@@ -389,7 +390,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
         }
 
         //String urlUpdateIcon = "http://115.28.66.165:8080/uploadHead.action?username=" + userInfoStatic.getUsername() + "&userhead=" + bitmap64;
-        String urlUploadIcon = "http://211.83.103.247:8037/TeamTalk/uploadHead.action?username=" + userInfoStatic.getUsername() + "&userhead=" + bitmap64;
+        String urlUploadIcon = urlHead + "uploadHead.action?username=" + userInfoStatic.getUsername() + "&userhead=" + bitmap64;
 
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urlUploadIcon, new Response.Listener<String>() {
             @Override
@@ -444,7 +445,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                     mQueue = Volley.newRequestQueue(getActivity());
                 }
 
-                String uri = "http://115.28.66.165:8080/updateInfo.action?username="
+                String uri = urlHead + "updateInfo.action?username="
                         + userInfoStatic.getUsername() + "&nickname=" + userName + "&type=0";
                 /*String uri = "http://115.28.66.165:8080/login.action?username="
                         + userInfoStatic.getUsername() + "&password=123";*/
@@ -522,7 +523,7 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                 }
 
                 final String finalDepart = depart;
-                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://115.28.66.165:8080/updateInfo.action?username="
+                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, urlHead + "updateInfo.action?username="
                         + userInfoStatic.getUsername() + "&depart=" + depart + "&type=2", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {

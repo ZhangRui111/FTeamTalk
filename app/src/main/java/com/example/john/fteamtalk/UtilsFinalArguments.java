@@ -46,4 +46,7 @@ public class UtilsFinalArguments {
 
     //用户信息
     public static DataUserInfo userInfoStatic;
+
+    //请求头部
+    public static String urlHead = "http://211.83.99.167:8037/TeamTalk/";
 }

@@ -35,6 +35,8 @@ import java.util.Map;
 
 import static com.example.john.fteamtalk.UtilsFinalArguments.HANDLER_MODIFY_PASSWORD_ERROR;
 import static com.example.john.fteamtalk.UtilsFinalArguments.HANDLER_MODIFY_PASSWORD_OK;
+import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
+import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
 
 /**
@@ -149,7 +151,7 @@ public class ActivityModifyPassword extends AppCompatActivity implements View.On
     }
 
     private void funcCheckModify() {
-        /*oldPassword = oldPasswordEdt.getText().toString();
+        oldPassword = oldPasswordEdt.getText().toString();
         newPassword = newPasswordEdt.getText().toString();
         newPasswordCheck = newPasswordCheckEdt.getText().toString();
 
@@ -173,11 +175,38 @@ public class ActivityModifyPassword extends AppCompatActivity implements View.On
             builder.setCancelable(false);
             waitingDialog = builder.create();
             waitingDialog.show();
-        }*/
+        }
     }
 
+    /**
+     * 修改密码
+     * @param oldString
+     * @param newString
+     */
     private void funcCheckPassword(String oldString, String newString) {
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(ActivityModifyPassword.this);
+        }
 
+        String ulrdeleteFri = urlHead + "modifyPassword.action?username=" + userInfoStatic.getUsername() +
+                "&password=" + newString;
+
+        //Log.i("TTTT",ulrFriendList);
+        StringRequest deleteFriendRequest = new StringRequest(Request.Method.POST, ulrdeleteFri, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                //Log.i("LISTTTT",s);
+                Toast.makeText(ActivityModifyPassword.this, "Change password ok!", Toast.LENGTH_SHORT).show();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                //Log.i("TTTT","error");
+            }
+        });
+        mQueue.add(deleteFriendRequest);
     }
 
     public static void actionStart(Context context){

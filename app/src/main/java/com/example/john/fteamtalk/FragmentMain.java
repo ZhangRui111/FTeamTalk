@@ -47,6 +47,7 @@ import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_READ_CONTAC
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.contactList;
 import static com.example.john.fteamtalk.UtilsFinalArguments.dataList;
+import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
 /**
@@ -112,13 +113,13 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
             mQueue = Volley.newRequestQueue(getActivity());
         }
 
-        String ulrFriendList = "http://211.83.103.247:8037/TeamTalk/sendFriendList.action?username=" + userInfoStatic.getUsername();
+        String ulrFriendList = urlHead + "sendFriendList.action?username=" + userInfoStatic.getUsername();
 
        //Log.i("TTTT",ulrFriendList);
         StringRequest friendListRequest = new StringRequest(Request.Method.POST, ulrFriendList, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                //Log.i("TTTT",s);
+                //Log.i("LISTTTT",s);
                 Gson gson = new Gson();
                 DataFriendList dat = gson.fromJson(s,DataFriendList.class);
 
@@ -188,7 +189,7 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         friendList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                DataFriendInfo selectedEntity = dataList.get(i);//得到点击的那一项
+                final DataFriendInfo selectedEntity = dataList.get(i);//得到点击的那一项
 
                 final int num = i;
                 //Toast.makeText(getActivity(), selectedEntity.getUserNickName(), Toast.LENGTH_SHORT).show();
@@ -201,6 +202,8 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dataList.remove(num);
                         myAdapter.notifyDataSetChanged(); //当有新消息的时候，刷新ListView中的显示
+
+                        funcDeleteFri(selectedEntity.getUserNickName());
                     }
                 });
                 builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -282,6 +285,32 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
             default:
                 break;
         }
+    }
+
+    private void funcDeleteFri(String userNickName) {
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(getActivity());
+        }
+
+        String ulrdeleteFri = urlHead + "deleteFriend.action?username=" + userInfoStatic.getUsername() +
+                "&friendName=" + userNickName;
+
+        //Log.i("TTTT",ulrFriendList);
+        StringRequest deleteFriendRequest = new StringRequest(Request.Method.POST, ulrdeleteFri, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                //Log.i("LISTTTT",s);
+                Toast.makeText(getActivity(), "Delete complete!", Toast.LENGTH_SHORT).show();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                //Log.i("TTTT","error");
+            }
+        });
+        mQueue.add(deleteFriendRequest);
     }
 
     private void funcNewFriend() {

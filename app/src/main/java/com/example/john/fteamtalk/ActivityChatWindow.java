@@ -27,6 +27,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 import com.jph.takephoto.app.TakePhoto;
 import com.jph.takephoto.app.TakePhotoActivity;
 import com.jph.takephoto.compress.CompressConfig;
@@ -36,8 +37,11 @@ import com.jph.takephoto.model.TResult;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.example.john.fteamtalk.UtilsFinalArguments.imagePicPath;
+import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 import static com.example.john.fteamtalk.UtilsLibrary.bitmapToBase64;
 import static com.example.john.fteamtalk.UtilsLibrary.decodeFileUtils;
@@ -62,6 +66,7 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
     private boolean ifNewMessage;
     private String message;
     private String ne;
+    private String newMessage;   //在当前Activity时接受的消息
 
     private RequestQueue mQueue;
 
@@ -72,6 +77,10 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
     private Uri imagePicUri;
     private String picStr;
 
+    //定时任务
+    private Timer timer;
+    private TimerTask msgWinTask;
+
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             int what = msg.what;
@@ -80,11 +89,21 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
                     //ListView条目控制在最后一行
                     lv_chat_listView.setSelection(personChats.size());
                     break;
+                case 199:
+                    funcListViewAddItem();
+                    break;
                 default:
                     break;
             }
         };
     };
+
+    private void funcListViewAddItem() {
+        //DataChatMessage msg = new DataChatMessage(userId,friNickName,"ibds",DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
+        DataChatMessage msg = new DataChatMessage(userId,friNickName,newMessage,DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
+        personChats.add(msg);
+        chatAdapter.notifyDataSetChanged();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +157,11 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
         //cropOptions = new CropOptions.Builder().setAspectX(1).setAspectY(1).setWithOwnCrop(false).create();  //设置裁剪参数
         compressConfig=new CompressConfig.Builder().setMaxSize(50*1024).setMaxPixel(800).create();  //设置压缩参数
         takePhoto.onEnableCompress(compressConfig,true);  //设置为需要压缩
+
+        //定时任务收发消息
+        timer = new Timer();
+        msgWinTask = new receiveMsgWinTask();
+        timer.schedule(msgWinTask,1000,4*1000);//1秒后每4秒执行该任务一次--接收消息
     }
 
     private void initClickEvent() {
@@ -208,7 +232,7 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
             mQueue = Volley.newRequestQueue(this);
         }
 
-        String urlNewMsg = "http://211.83.103.247:8037/TeamTalk/SendMessage.action?username=" + nickname + "&friendName=" + friendName + "&message=" +
+        String urlNewMsg = urlHead + "SendMessage.action?username=" + nickname + "&friendName=" + friendName + "&message=" +
                 msg +"&time=" + "201705121123";
         Log.i("TTT",urlNewMsg);
 
@@ -242,7 +266,7 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
             mQueue = Volley.newRequestQueue(this);
         }
 
-        String urlSendPic = "http://211.83.103.247:8037/TeamTalk/SendPicture.action?username=" + userInfoStatic.getUsername() + "&friendName=" + friNickName + "&head=" +
+        String urlSendPic = urlHead + "SendPicture.action?username=" + userInfoStatic.getUsername() + "&friendName=" + friNickName + "&head=" +
                 picStr +"&time=" + "201705121123";
 
         Log.i("TTTT",urlSendPic);
@@ -290,6 +314,52 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
         personChats.add(msg);*/
         lv_chat_listView.setAdapter(chatAdapter);
         //Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show();
+    }
+
+    public class receiveMsgWinTask extends TimerTask {
+        @Override
+        public void run() {
+            //handler.sendEmptyMessage(199);
+            /*//通过Tag获取Fragment实例，进而调用Fragment里的方法
+            FragmentMoments fragmentMoments =
+                    (FragmentMoments) getSupportFragmentManager().findFragmentByTag("tagFragmentMoments");
+            fragmentMoments.funcToast();*/
+
+            //任务代码写在此处
+            //初始化一个网络请求队列
+            if (mQueue == null) {
+                mQueue = Volley.newRequestQueue(ActivityChatWindow.this);
+            }
+
+            String urlReceiveMsg = urlHead + "receiveMessage.action?username=" + userInfoStatic.getUsername();
+
+            StringRequest receiveMsgRequest = new StringRequest(Request.Method.POST, urlReceiveMsg, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    Log.i("TTT",s);
+                    Gson gson = new Gson();
+                    DataReceiveMessage data;
+                    data = gson.fromJson(s,DataReceiveMessage.class);
+                    if (data != null) {
+                        if (data.getData() != null){
+                            Log.i("TTTT","msg:" + data.getData().getMessage());
+                            if (data.getData().getFriendName().equals(friNickName)) {
+                                //发信人和目前所在的对话框的人一致
+                                newMessage = data.getMsg();
+                                handler.sendEmptyMessage(199);
+                            }
+                        }
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+
+                }
+            });
+
+            mQueue.add(receiveMsgRequest);
+        }
     }
 
     public static void actionStart(Context context){

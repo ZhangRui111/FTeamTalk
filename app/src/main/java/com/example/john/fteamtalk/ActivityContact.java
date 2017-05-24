@@ -27,6 +27,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import static com.example.john.fteamtalk.UtilsFinalArguments.contactList;
+import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
 /**
@@ -127,7 +128,7 @@ public class ActivityContact extends BaseActivity {
             mQueue = Volley.newRequestQueue(ActivityContact.this);
         }
 
-        String urlNewFriend = "http://211.83.103.247:8037/TeamTalk/RequestAddFriend.action?username=" + userInfoStatic.getUsername() + "&friendName=" + friendName;
+        String urlNewFriend = urlHead + "RequestAddFriend.action?username=" + userInfoStatic.getUsername() + "&friendName=" + friendName;
 
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urlNewFriend, new Response.Listener<String>() {
             @Override

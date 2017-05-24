@@ -54,6 +54,7 @@ import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_CAMERO;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_WRITE_EXTERNAL_STORAGE;
 import static com.example.john.fteamtalk.UtilsFinalArguments.dataList;
+import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 import static com.example.john.fteamtalk.UtilsLibrary.decodeFileUtils;
 
@@ -85,7 +86,7 @@ public class ActivityMain extends BaseActivity
     //dialog
     private AlertDialog dialog;
 
-    //
+    //定时任务
     private Timer timer;
     private TimerTask msgTask;
     private TimerTask msgPicTask;
@@ -222,7 +223,7 @@ public class ActivityMain extends BaseActivity
         msgPicTask = new receiveMsgPicTask();
         waitFriReqTask = new receiveFriendListTask();
 
-        timer.schedule(msgTask,5000,5*1000);//5秒后每10秒执行该任务一次--接收消息
+        timer.schedule(msgTask,5000,3*1000);//5秒后每3秒执行该任务一次--接收消息
         //timer.schedule(msgTask,1*60*1000);//1分钟后执行该任务一次
         timer.schedule(msgPicTask,6000,5*1000);  //6秒后每15秒执行该任务一次--接收图片
         timer.schedule(waitFriReqTask,7000,20*1000);  //6秒后每20秒执行该任务一次--接收好友请求
@@ -234,10 +235,11 @@ public class ActivityMain extends BaseActivity
             mQueue = Volley.newRequestQueue(ActivityMain.this);
         }
 
-        StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, "http://211.83.103.247:8037/TeamTalk/sendUserInfo.action?username=" +
+        StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, urlHead + "sendUserInfo.action?username=" +
                 userInfoStatic.getUsername(), new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
+
                 Gson gson = new Gson();
                 DataInitUserInfo data = gson.fromJson(s,DataInitUserInfo.class);
                 if(data.getData().getSignature() != null) {
@@ -276,7 +278,7 @@ public class ActivityMain extends BaseActivity
             case R.id.txt_name_header:
             case R.id.txt_sign:
                 //doSomething
-                funcEditUsserSign();
+                funcEditUserSign();
                 break;
             case R.id.imageView_user_icon_header:
                 //doSomething
@@ -417,6 +419,7 @@ public class ActivityMain extends BaseActivity
         super.onDestroy();
         msgTask.cancel();
         msgPicTask.cancel();
+        waitFriReqTask.cancel();
     }
 
     /**
@@ -437,7 +440,7 @@ public class ActivityMain extends BaseActivity
         }
     }
 
-    private void funcEditUsserSign() {
+    private void funcEditUserSign() {
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityMain.this, R.style.MyAlertDialogStyle);
         builder.setTitle("Change your Signature");
         final EditText input = new EditText(this);
@@ -509,7 +512,7 @@ public class ActivityMain extends BaseActivity
                 mQueue = Volley.newRequestQueue(ActivityMain.this);
             }
 
-            String urlReceiveMsg = "http://211.83.103.247:8037/TeamTalk/receiveMessage.action?username=" + userInfoStatic.getUsername();
+            String urlReceiveMsg = urlHead + "receiveMessage.action?username=" + userInfoStatic.getUsername();
 
             StringRequest receiveMsgRequest = new StringRequest(Request.Method.POST, urlReceiveMsg, new Response.Listener<String>() {
                 @Override
@@ -521,7 +524,7 @@ public class ActivityMain extends BaseActivity
                     if (data != null) {
                         if (data.getData() != null){
                             Log.i("TTTT","msg:" + data.getData().getMessage());
-                            //后台增加消息
+                            //
                             funcFragmentAddItem(new DataItemNewMessage(data.getData().getFriendName(),data.getData().getMessage(),1));
                         }
                     }
@@ -547,7 +550,7 @@ public class ActivityMain extends BaseActivity
                 mQueue = Volley.newRequestQueue(ActivityMain.this);
             }
 
-            String urlReceiveMsgPic = "http://211.83.103.247:8037/TeamTalk/receivePicture.action?username=" + userInfoStatic.getUsername() ;
+            String urlReceiveMsgPic = urlHead + "receivePicture.action?username=" + userInfoStatic.getUsername() ;
 
             StringRequest receiveMsgPicRequest = new StringRequest(Request.Method.POST, urlReceiveMsgPic, new Response.Listener<String>() {
                 @Override
@@ -582,7 +585,7 @@ public class ActivityMain extends BaseActivity
                 mQueue = Volley.newRequestQueue(ActivityMain.this);
             }
 
-            String urlListMsg = "http://211.83.103.247:8037/TeamTalk/isRequest.action?username=" + userInfoStatic.getUsername() ;
+            String urlListMsg = urlHead + "isRequest.action?username=" + userInfoStatic.getUsername() ;
 
             StringRequest receiveFriListRequest = new StringRequest(Request.Method.POST, urlListMsg, new Response.Listener<String>() {
                 @Override
