@@ -89,6 +89,7 @@ public class ActivityMain extends BaseActivity
     private Timer timer;
     private TimerTask msgTask;
     private TimerTask msgPicTask;
+    private TimerTask waitFriReqTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,15 +215,59 @@ public class ActivityMain extends BaseActivity
         mFragmentTransaction.commit();
 
         //funcGetContact();
-        //initUserInfo();
+        initUserInfo();
         timer = new Timer();
 
         msgTask = new receiveMsgTask();
         msgPicTask = new receiveMsgPicTask();
+        waitFriReqTask = new receiveFriendListTask();
 
-        timer.schedule(msgTask,5000,5*1000);//0毫秒后每10秒执行该任务一次--接收消息
+        timer.schedule(msgTask,5000,5*1000);//5秒后每10秒执行该任务一次--接收消息
         //timer.schedule(msgTask,1*60*1000);//1分钟后执行该任务一次
-        timer.schedule(msgPicTask,6000,5*1000);  //1秒后每15秒执行该任务一次--接收图片
+        timer.schedule(msgPicTask,6000,5*1000);  //6秒后每15秒执行该任务一次--接收图片
+        timer.schedule(waitFriReqTask,7000,20*1000);  //6秒后每20秒执行该任务一次--接收好友请求
+    }
+
+    private void initUserInfo() {
+        //网络Http修改昵称
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(ActivityMain.this);
+        }
+
+        StringRequest modifyPasswordRequest = new StringRequest(Request.Method.PUT, "http://211.83.103.247:8037/TeamTalk/sendUserInfo.action?username=" +
+                userInfoStatic.getUsername(), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Gson gson = new Gson();
+                DataInitUserInfo data = gson.fromJson(s,DataInitUserInfo.class);
+                if(data.getData().getSignature() != null) {
+                    userInfoStatic.setSignature(data.getData().getSignature());
+                }
+                if (data.getData().getNickname() != null) {
+                    userInfoStatic.setNickname(data.getData().getNickname());
+                }
+                if (data.getData().getSex() != null) {
+                    userInfoStatic.setUsersex(data.getData().getSex());
+                }
+                if (data.getData().getDepart() != null) {
+                    userInfoStatic.setDepartment(data.getData().getDepart());
+                }
+
+                if (userInfoStatic.getNickname() != null) {
+                    drawerUserNameTxv.setText(userInfoStatic.getNickname());
+                }
+                if (userInfoStatic.getSignature() != null) {
+                    drawerUserSignTxv.setText(userInfoStatic.getSignature());
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(ActivityMain.this, "更新用户信息失败", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mQueue.add(modifyPasswordRequest);
     }
 
     @Override
@@ -440,21 +485,31 @@ public class ActivityMain extends BaseActivity
         builder.create().show();
     }
 
+    /**
+     *子线程收到消息后在FragmentMoments创建Item
+     */
+    public void funcFragmentAddItem(DataItemNewMessage data) {
+        //通过Tag获取Fragment实例，进而调用Fragment里的方法
+        FragmentMoments fragmentMoments =
+                (FragmentMoments) getSupportFragmentManager().findFragmentByTag("tagFragmentMoments");
+        fragmentMoments.funcGetNewMessage(data);
+    }
+
     public class receiveMsgTask extends TimerTask {
         @Override
         public void run() {
             //任务代码写在此处
             Log.i("TTT","task1");
-            //通过Tag获取Fragment实例，进而调用Fragment里的方法
+            /*//通过Tag获取Fragment实例，进而调用Fragment里的方法
             FragmentMoments fragmentMoments =
                     (FragmentMoments) getSupportFragmentManager().findFragmentByTag("tagFragmentMoments");
-            fragmentMoments.funcToast();
+            fragmentMoments.funcToast();*/
             //初始化一个网络请求队列
-            /*if (mQueue == null) {
+            if (mQueue == null) {
                 mQueue = Volley.newRequestQueue(ActivityMain.this);
             }
 
-            String urlReceiveMsg = "http://115.28.66.165:8080/receiveMessage.action?username=" + userInfoStatic.getUsername() ;
+            String urlReceiveMsg = "http://211.83.103.247:8037/TeamTalk/receiveMessage.action?username=" + userInfoStatic.getUsername();
 
             StringRequest receiveMsgRequest = new StringRequest(Request.Method.POST, urlReceiveMsg, new Response.Listener<String>() {
                 @Override
@@ -463,7 +518,13 @@ public class ActivityMain extends BaseActivity
                     Gson gson = new Gson();
                     DataReceiveMessage data;
                     data = gson.fromJson(s,DataReceiveMessage.class);
-                    Log.i("TTT","msg:" + data.getData().getMessage());
+                    if (data != null) {
+                        if (data.getData() != null){
+                            Log.i("TTTT","msg:" + data.getData().getMessage());
+                            //后台增加消息
+                            funcFragmentAddItem(new DataItemNewMessage(data.getData().getFriendName(),data.getData().getMessage(),1));
+                        }
+                    }
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -472,7 +533,7 @@ public class ActivityMain extends BaseActivity
                 }
             });
 
-            mQueue.add(receiveMsgRequest);*/
+            mQueue.add(receiveMsgRequest);
         }
     }
 
@@ -481,12 +542,12 @@ public class ActivityMain extends BaseActivity
         public void run() {
             //任务代码写在此处
             Log.i("TTT","task2");
-            /*//初始化一个网络请求队列
+            //初始化一个网络请求队列
             if (mQueue == null) {
                 mQueue = Volley.newRequestQueue(ActivityMain.this);
             }
 
-            String urlReceiveMsgPic = "http://115.28.66.165:8080/receivePicture.action?username=" + userInfoStatic.getUsername() ;
+            String urlReceiveMsgPic = "http://211.83.103.247:8037/TeamTalk/receivePicture.action?username=" + userInfoStatic.getUsername() ;
 
             StringRequest receiveMsgPicRequest = new StringRequest(Request.Method.POST, urlReceiveMsgPic, new Response.Listener<String>() {
                 @Override
@@ -495,7 +556,11 @@ public class ActivityMain extends BaseActivity
                     Gson gson = new Gson();
                     DataReceivePicture data;
                     data = gson.fromJson(s,DataReceivePicture.class);
-                    Log.i("TTT","msg:" + data.getData().getHead());
+                    if (data != null){
+                        if(data.getData() != null){
+                            Log.i("TTTT","Pic:" + data.getData().getHead());
+                        }
+                    }
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -504,7 +569,35 @@ public class ActivityMain extends BaseActivity
                 }
             });
 
-            mQueue.add(receiveMsgPicRequest);*/
+            mQueue.add(receiveMsgPicRequest);
+        }
+    }
+
+    public class receiveFriendListTask extends TimerTask {
+        @Override
+        public void run() {
+
+            //初始化一个网络请求队列
+            if (mQueue == null) {
+                mQueue = Volley.newRequestQueue(ActivityMain.this);
+            }
+
+            String urlListMsg = "http://211.83.103.247:8037/TeamTalk/isRequest.action?username=" + userInfoStatic.getUsername() ;
+
+            StringRequest receiveFriListRequest = new StringRequest(Request.Method.POST, urlListMsg, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    Log.i("TTT",s);
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+
+                }
+            });
+
+            mQueue.add(receiveFriListRequest);
         }
     }
 

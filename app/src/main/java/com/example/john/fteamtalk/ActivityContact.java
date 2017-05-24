@@ -97,7 +97,7 @@ public class ActivityContact extends BaseActivity {
         });
     }
 
-    private void funcRequestNewFriend(String friendname) {
+    private void funcWhat(String friendname) {
         Toast.makeText(this, "Request has been send!", Toast.LENGTH_SHORT).show();
         //网络Http修改昵称
         if (mQueue == null) {
@@ -118,6 +118,34 @@ public class ActivityContact extends BaseActivity {
 
         mQueue.add(setNicknameRequest);
     }
+
+    private void funcRequestNewFriend(String friendName) {
+        Toast.makeText(this, "Request has been send!", Toast.LENGTH_SHORT).show();
+        friendName = "1234";
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(ActivityContact.this);
+        }
+
+        String urlNewFriend = "http://211.83.103.247:8037/TeamTalk/RequestAddFriend.action?username=" + userInfoStatic.getUsername() + "&friendName=" + friendName;
+
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlNewFriend, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                Toast.makeText(ActivityContact.this, "OK" + s, Toast.LENGTH_SHORT).show();
+
+                //handler.sendEmptyMessage(HANDLER_NEW_FRIEND);//发送消失到handler，通知主线程修改昵称成功
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        });
+
+        mQueue.add(loginRequest);
+    }
+
 
     public static void actionStart(Context context) {
         Intent intent = new Intent(context, ActivityContact.class);

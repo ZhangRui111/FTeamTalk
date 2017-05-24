@@ -20,13 +20,28 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
@@ -107,11 +122,11 @@ public class ActivityInitInfo extends BaseActivity implements View.OnClickListen
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
                             case 0:
-                                sexStr = "男";
+                                sexStr = "0";
                                 userSexTev.setText("男");
                                 break;
                             case 1:
-                                sexStr = "女";
+                                sexStr = "1";
                                 userSexTev.setText("女");
                                 break;
                             default:
@@ -130,23 +145,23 @@ public class ActivityInitInfo extends BaseActivity implements View.OnClickListen
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
                             case 0:
-                                departStr = "IT部";
+                                departStr = "0";
                                 userDepartTxv.setText("IT部");
                                 break;
                             case 1:
-                                departStr = "秘书处";
+                                departStr = "1";
                                 userDepartTxv.setText("秘书处");
                                 break;
                             case 2:
-                                departStr = "后勤部";
+                                departStr = "2";
                                 userDepartTxv.setText("后勤部");
                                 break;
                             case 3:
-                                departStr = "经理部";
+                                departStr = "3";
                                 userDepartTxv.setText("经理部");
                                 break;
                             case 4:
-                                departStr = "销售部";
+                                departStr = "4";
                                 userDepartTxv.setText("销售部");
                                 break;
                             default:
@@ -212,12 +227,58 @@ public class ActivityInitInfo extends BaseActivity implements View.OnClickListen
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
+                String json;
+
+                NetworkResponse response = volleyError.networkResponse;
+
+                if (volleyError instanceof TimeoutError || volleyError instanceof NoConnectionError) {
+                    Toast.makeText(ActivityInitInfo.this, "1", Toast.LENGTH_SHORT).show();
+                } else if (volleyError instanceof AuthFailureError) {
+                    //TODO
+                    Toast.makeText(ActivityInitInfo.this, "2", Toast.LENGTH_SHORT).show();
+                } else if (volleyError instanceof ServerError) {
+                    //TODO
+                    Toast.makeText(ActivityInitInfo.this, "3", Toast.LENGTH_SHORT).show();
+                } else if (volleyError instanceof NetworkError) {
+                    //TODO
+                    Toast.makeText(ActivityInitInfo.this, "4", Toast.LENGTH_SHORT).show();
+                } else if (volleyError instanceof ParseError) {
+                    //TODO
+                    Toast.makeText(ActivityInitInfo.this, "5", Toast.LENGTH_SHORT).show();
+                }
+
+                if(response != null && response.data != null){
+                    switch(response.statusCode){
+                        case 400:
+                            json = new String(response.data);
+                            json = trimMessage(json, "message");
+                            if(json != null)
+                                Toast.makeText(ActivityInitInfo.this, json, Toast.LENGTH_SHORT).show();
+                            else
+                                Toast.makeText(ActivityInitInfo.this, "NULL", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                    //Additional cases
+                }
                 dialog.dismiss();
-                Toast.makeText(ActivityInitInfo.this, "未知错误！", Toast.LENGTH_SHORT).show();
             }
         });
         mQueue.add(loginRequest);
     }
+    public String trimMessage(String json, String key){
+        String trimmedString = null;
+
+        try{
+            JSONObject obj = new JSONObject(json);
+            trimmedString = obj.getString(key);
+        } catch(JSONException e){
+            e.printStackTrace();
+            return null;
+        }
+
+        return trimmedString;
+    }
+
 
     /**
      * 对于不同版本的安卓系统实现沉浸式体验

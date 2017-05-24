@@ -179,9 +179,9 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         switch (v.getId()) {
             //登录按钮
             case R.id.button_login:
-                //funcCheckInput();
-                ActivityMain.actionStart(ActivityLogin.this);
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                funcCheckInput();
+                //ActivityMain.actionStart(ActivityLogin.this);
+                //overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                 break;
             //密码是否明文显示按钮
             case R.id.Img_btn_hide:

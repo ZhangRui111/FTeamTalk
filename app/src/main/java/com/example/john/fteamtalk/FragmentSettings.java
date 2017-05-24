@@ -242,7 +242,34 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
 
     private void initData() {
         //UIs
+        if (userInfoStatic.getNickname() != null) {
+            userNameTxv.setText(userInfoStatic.getNickname());
+        }
+        if (userInfoStatic.getDepartment() != null) {
+            String i = userInfoStatic.getDepartment();
 
+            String departStr = "";
+            switch (i) {
+                case "0":
+                    departStr = "IT部";
+                    break;
+                case "1":
+                    departStr = "秘书处";
+                    break;
+                case "2":
+                    departStr = "后勤部";
+                    break;
+                case "3":
+                    departStr = "经理部";
+                    break;
+                case "4":
+                    departStr = "销售部";
+                    break;
+                default:
+                    break;
+            }
+            userGenderTxv.setText(departStr);
+        }
 
 
         //takePhoto
@@ -361,9 +388,10 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
             mQueue = Volley.newRequestQueue(getActivity());
         }
 
-        String urlUpdateIcon = "http://115.28.66.165:8080/uploadHead.action?username=" + "123" + "&userhead=" + bitmap64;
+        //String urlUpdateIcon = "http://115.28.66.165:8080/uploadHead.action?username=" + userInfoStatic.getUsername() + "&userhead=" + bitmap64;
+        String urlUploadIcon = "http://211.83.103.247:8037/TeamTalk/uploadHead.action?username=" + userInfoStatic.getUsername() + "&userhead=" + bitmap64;
 
-        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlUpdateIcon, new Response.Listener<String>() {
+        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlUploadIcon, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 ((ActivityMain) getActivity()).funcSetNavHeader(null,iconPath);
@@ -373,7 +401,10 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-
+                /*((ActivityMain) getActivity()).funcSetNavHeader(null,iconPath);
+                userIconUIImg.setImageBitmap(decodeFileUtils(iconPath));*/
+                ((ActivityMain) getActivity()).funcSetNavHeader(null,iconPath);
+                userIconUIImg.setImageBitmap(decodeFileUtils(iconPath));
             }
         });
 
@@ -413,8 +444,11 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                     mQueue = Volley.newRequestQueue(getActivity());
                 }
 
-                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://115.28.66.165:8080/updateInfo.action?username="
-                        + userInfoStatic.getUsername() + "&nickname" + userName + "&type=0", new Response.Listener<String>() {
+                String uri = "http://115.28.66.165:8080/updateInfo.action?username="
+                        + userInfoStatic.getUsername() + "&nickname=" + userName + "&type=0";
+                /*String uri = "http://115.28.66.165:8080/login.action?username="
+                        + userInfoStatic.getUsername() + "&password=123";*/
+                StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, uri, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
 
@@ -428,8 +462,19 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                     public void onErrorResponse(VolleyError volleyError) {
                         Toast.makeText(getActivity(), "昵称更改失败", Toast.LENGTH_SHORT).show();
                     }
-                });
+                }){
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError
+                    {
+                        Map<String, String> headers = new HashMap<String, String>();
+                        headers.put("Charset", "UTF-8");
+                        headers.put("Content-Type", "application/x-javascript");
+                        headers.put("Accept-Encoding", "gzip,deflate");
+                        return headers;
+                    }
+                };
 
+                Log.i("TTT",uri + userInfoStatic.getUsername());
                 mQueue.add(setNicknameRequest);
             }
         });
@@ -449,19 +494,24 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
                 String depart = "";
                 switch (i) {
                     case 0:
-                        depart = "IT部";
+                        depart = "0";
+                        userGenderTxv.setText("IT部");
                         break;
                     case 1:
-                        depart = "秘书处";
+                        depart = "1";
+                        userGenderTxv.setText("秘书处");
                         break;
                     case 2:
-                        depart = "后勤部";
+                        depart = "2";
+                        userGenderTxv.setText("后勤部");
                         break;
                     case 3:
-                        depart = "经理部";
+                        depart = "3";
+                        userGenderTxv.setText("经理部");
                         break;
                     case 4:
-                        depart = "销售部";
+                        depart = "4";
+                        userGenderTxv.setText("销售部");
                         break;
                     default:
                         break;
@@ -473,11 +523,9 @@ public class FragmentSettings extends TakePhotoFragment implements View.OnClickL
 
                 final String finalDepart = depart;
                 StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://115.28.66.165:8080/updateInfo.action?username="
-                        + userInfoStatic.getUsername() + "&depart" + depart + "&type=2", new Response.Listener<String>() {
+                        + userInfoStatic.getUsername() + "&depart=" + depart + "&type=2", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-
-                        userGenderTxv.setText(finalDepart);
 
                         userInfoStatic.setDepartment(finalDepart);
                     }

@@ -47,6 +47,7 @@ import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_READ_CONTAC
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.contactList;
 import static com.example.john.fteamtalk.UtilsFinalArguments.dataList;
+import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
 /**
  * Created by john on 2017/3/22.
@@ -62,6 +63,7 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
     private ListView friendList;
     private AlertDialog waitingDialog;
 
+
     //data
     private AdapterFriendList myAdapter;
     private Boolean flag = true;
@@ -73,6 +75,9 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
+                case 233:
+
+                    break;
                 default:
                     break;
             }
@@ -97,18 +102,65 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
     }
 
     private void initData() {
+
         dataList = new ArrayList<>();
         DataFriendInfo tmpData;
         int i = 0;
-        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
+
+        //初始化一个网络请求队列
+        if (mQueue == null) {
+            mQueue = Volley.newRequestQueue(getActivity());
+        }
+
+        String ulrFriendList = "http://211.83.103.247:8037/TeamTalk/sendFriendList.action?username=" + userInfoStatic.getUsername();
+
+       //Log.i("TTTT",ulrFriendList);
+        StringRequest friendListRequest = new StringRequest(Request.Method.POST, ulrFriendList, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                //Log.i("TTTT",s);
+                Gson gson = new Gson();
+                DataFriendList dat = gson.fromJson(s,DataFriendList.class);
+
+                int n = 0;
+                for(;n<dat.getData().size();n++){
+                    String Str = dat.getDataItem(n).getDepart();
+                    String departStr = "";
+                    switch (Str) {
+                        case "0":
+                            departStr = "IT部";
+                            break;
+                        case "1":
+                            departStr = "秘书处";
+                            break;
+                        case "2":
+                            departStr = "后勤部";
+                            break;
+                        case "3":
+                            departStr = "经理部";
+                            break;
+                        case "4":
+                            departStr = "销售部";
+                            break;
+                        default:
+                            break;
+                    }
+                    DataFriendInfo Data = new DataFriendInfo(n,dat.getDataItem(n).getUsername(),departStr);
+                    dataList.add(Data);
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                //Log.i("TTTT","error");
+            }
+        });
+        mQueue.add(friendListRequest);
+
+        tmpData = new DataFriendInfo(i++,"zzz","后勤部");
         dataList.add(tmpData);
-        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
-        dataList.add(tmpData);
-        tmpData = new DataFriendInfo(i++,"哈哈"+i,"IT部");
+        tmpData = new DataFriendInfo(i++,"gyh","IT部");
         dataList.add(tmpData);
 
         contactList = new ArrayList<>();  //通讯录
@@ -130,6 +182,35 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
                 intent.putExtra("userId",selectedEntity.getUserId());
                 intent.putExtra("userNickName",selectedEntity.getUserNickName());
                 startActivity(intent);
+            }
+        });
+
+        friendList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                DataFriendInfo selectedEntity = dataList.get(i);//得到点击的那一项
+
+                final int num = i;
+                //Toast.makeText(getActivity(), selectedEntity.getUserNickName(), Toast.LENGTH_SHORT).show();
+                //handler.sendEmptyMessage(233);
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
+                builder.setTitle("delete friend");
+                builder.setMessage("Are you sure to delete" + " " + selectedEntity.getUserNickName());
+                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dataList.remove(num);
+                        myAdapter.notifyDataSetChanged(); //当有新消息的时候，刷新ListView中的显示
+                    }
+                });
+                builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        waitingDialog.dismiss();
+                    }
+                });
+                builder.create().show();
+                return false;
             }
         });
 
@@ -194,8 +275,9 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
                 break;
             case R.id.fa_flash_btn:
                 //Toast.makeText(getActivity(), "刷新", Toast.LENGTH_SHORT).show();
-                ActivityContact.actionStart(getActivity());
-                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                /*ActivityContact.actionStart(getActivity());
+                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out)*/;
+                myAdapter.notifyDataSetChanged();  //更新列表
                 break;
             default:
                 break;
@@ -213,69 +295,12 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         waitingDialog = builder.create();
         waitingDialog.show();
         new ContactTask().execute();
-
-
-        /*final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
-        builder.setTitle("Find a new friend");
-
-        final LinearLayout newFriendLinlay= new LinearLayout(getActivity());
-        newFriendLinlay.setOrientation(LinearLayout.VERTICAL);
-
-        final EditText input = new EditText(getActivity());
-        input.setSingleLine();
-        input.setGravity(Gravity.CENTER_HORIZONTAL);
-        input.setBackgroundResource(R.drawable.edittext_input_line);  //自定义EditText颜色
-        input.setText("new friend ID");
-        input.setTextColor(Color.GRAY);
-        newFriendLinlay.addView(input);
-        final EditText inputMsg = new EditText(getActivity());
-        inputMsg.setSingleLine();
-        inputMsg.setGravity(Gravity.CENTER_HORIZONTAL);
-        inputMsg.setBackgroundResource(R.drawable.edittext_input_line);  //自定义EditText颜色
-        inputMsg.setText("some message");
-        inputMsg.setTextColor(Color.GRAY);
-        newFriendLinlay.addView(inputMsg);
-        builder.setView(newFriendLinlay,20,20,20,20);
-
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                final String friendName = input.getText().toString();
-                new Thread() {
-                    @Override
-                    public void run() {
-                        //在子线程中进行网络请求
-                        funcIfExist("123",friendName);  *//*用户真实昵称需要更改这里*//*
-                    }
-                }.start();
-
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
-                builder.setTitle("正在查找");
-                builder.setCancelable(false);
-                ProgressBar progressBar = new ProgressBar(getActivity());
-                builder.setView(progressBar,20,20,20,20);
-                builder.setCancelable(true);
-                waitingDialog = builder.create();
-                waitingDialog.show();  //记得添加dismiss
-
-                dialog.dismiss();
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();*/
     }
 
     class ContactTask extends AsyncTask<String, Integer, Void> {
 
         protected Void doInBackground(String... params) {
-            if(flag == true) {
+            if (flag == true) {
                 DataFriendInfo tmpData;
                 int i = 0;
 
@@ -283,25 +308,23 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
                 //取得电话本中开始一项的光标
                 Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
                 //向下移动光标
-                while(cursor.moveToNext())
-                {
+                while (cursor.moveToNext()) {
                     //取得联系人名字
                     int nameFieldColumnIndex = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
                     String contact = cursor.getString(nameFieldColumnIndex);
 
                     //取得电话号码
                     String ContactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                    Cursor phone = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + ContactId, null, null);
+                    Cursor phone = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + ContactId, null, null);
 
-                    if(phone != null) {
-                        while(phone.moveToNext())
-                        {
+                    if (phone != null) {
+                        while (phone.moveToNext()) {
                             String PhoneNumber = phone.getString(phone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                             //格式化手机号
-                            PhoneNumber = PhoneNumber.replace("-","");
-                            PhoneNumber = PhoneNumber.replace(" ","");
+                            PhoneNumber = PhoneNumber.replace("-", "");
+                            PhoneNumber = PhoneNumber.replace(" ", "");
 
-                            tmpData = new DataFriendInfo(i++,contact,PhoneNumber);
+                            tmpData = new DataFriendInfo(i++, contact, PhoneNumber);
                             contactList.add(tmpData);
                         }
                     }
@@ -320,30 +343,5 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
             getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
         }
 
-    }
-
-    private void funcIfExist(String myNickName, String otherNickName) {
-        //初始化一个网络请求队列
-        if (mQueue == null) {
-            mQueue = Volley.newRequestQueue(getActivity());
-        }
-
-        String urlNewFriend = "http://115.28.66.165:8080/VerifyFriend.action?username=" + myNickName + "&friendName=" + otherNickName;
-
-        StringRequest loginRequest = new StringRequest(Request.Method.POST, urlNewFriend, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                Toast.makeText(getActivity(), "OK" + s, Toast.LENGTH_SHORT).show();
-
-                handler.sendEmptyMessage(HANDLER_NEW_FRIEND);//发送消失到handler，通知主线程修改昵称成功
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-
-            }
-        });
-
-        mQueue.add(loginRequest);
     }
 }

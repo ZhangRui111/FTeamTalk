@@ -1,5 +1,6 @@
 package com.example.john.fteamtalk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,26 +12,37 @@ public class DataFriendList {
     private String msg;
     private List<Data> data;
 
-    public class Data{
+    public class Data {
+        private String username;
+        private String friendName;
+        private String depart;
 
+        public String getDepart() {
+            return depart;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public String getFriendName() {
+            return friendName;
+        }
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public List<Data> getData() {
+        return data;
+    }
+
+    public Data getDataItem(int position) {
+        return data.get(position);
     }
 }
-
-/*
-{
-        "code": 0,
-        "msg": "send back successfully",
-        "data": [
-        [
-        "123",
-        "zzz"
-        ],
-        {
-        "username": "gyh",
-        "nickname": "Crysl",
-        "sex": "female",
-        "depart": "management",
-        "signature": "sdf"
-        }
-        ]
-        }*/

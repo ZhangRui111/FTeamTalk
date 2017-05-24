@@ -1,29 +1,26 @@
 package com.example.john.fteamtalk;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by john on 2017/5/8.
+ * Created by john on 2017/5/24.
  */
 
-public class AdapterFriendList extends ArrayAdapter<DataFriendInfo> {
+public class AdapterNewMessage extends ArrayAdapter<DataItemNewMessage> {
 
     int resourceId;
     Context mContext;
 
-    public AdapterFriendList(Context context, int resource, List<DataFriendInfo> objects) {
+    public AdapterNewMessage(Context context, int resource, List<DataItemNewMessage> objects) {
         super(context, resource, objects);
         resourceId = resource;
     }
@@ -35,23 +32,24 @@ public class AdapterFriendList extends ArrayAdapter<DataFriendInfo> {
             mContext = parent.getContext();
         }
 
-        DataFriendInfo msg = getItem(position);
+        DataItemNewMessage msg = getItem(position);
         final View view;
         ViewHolder viewHolder;
         if(convertView == null){
 
             view = LayoutInflater.from(getContext()).inflate(resourceId,null);
             viewHolder = new ViewHolder();
-            viewHolder.userIdTxv = (TextView) view.findViewById(R.id.itemUserId);
-            viewHolder.userDepartment = (TextView) view.findViewById(R.id.itemUserDepartment);
+            viewHolder.userIdTxv = (TextView) view.findViewById(R.id.itemUserID);
+            viewHolder.userDepartment = (TextView) view.findViewById(R.id.itemUserDepart);
+            viewHolder.message = (TextView) view.findViewById(R.id.newMessageTxv);
             view.setTag(viewHolder);
         }else{
             view = convertView;
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        viewHolder.userIdTxv.setText(msg.getUserNickName());
-        String depart = msg.getDepartment();
+        viewHolder.userIdTxv.setText(msg.getUserName());
+        /*String depart = msg.getData().get;
         String departStr = "";
         switch (depart) {
             case "0":
@@ -71,8 +69,10 @@ public class AdapterFriendList extends ArrayAdapter<DataFriendInfo> {
                 break;
             default:
                 break;
-        }
-        viewHolder.userDepartment.setText(departStr);
+        }*/
+        String num = msg.getNum() + "";
+        viewHolder.userDepartment.setText(num);
+        viewHolder.message.setText(msg.getMsg());
 
         return view;
     }
@@ -80,5 +80,6 @@ public class AdapterFriendList extends ArrayAdapter<DataFriendInfo> {
     class ViewHolder{
         TextView userIdTxv;
         TextView userDepartment;
+        TextView message;
     }
 }

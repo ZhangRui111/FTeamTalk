@@ -59,6 +59,9 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
     private AdapterChatMessage chatAdapter;
     private ListView lv_chat_listView;
     private List<DataChatMessage> personChats = new ArrayList<>();
+    private boolean ifNewMessage;
+    private String message;
+    private String ne;
 
     private RequestQueue mQueue;
 
@@ -94,7 +97,13 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
         initData();
         initClickEvent();
 
-        //initSend();
+        if (ne != null ) {
+            if (ne.equals("1")){
+                initSend2(message);
+            }
+        } else {
+            initSend();
+        }
     }
 
     private void initPermission() {
@@ -113,6 +122,13 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
         Intent intent = getIntent();
         friNickName = intent.getStringExtra("userNickName");
         userId = intent.getIntExtra("userId",0);
+        ne = intent.getStringExtra("newMessage");
+        if (ne != null ) {
+            if (ne.equals("1")){
+                message = intent.getStringExtra("message");
+            }
+        }
+
         toolbarTitle = (TextView) findViewById(R.id.toolbar_title);
         toolbarTitle.setText(friNickName);
 
@@ -122,7 +138,6 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
         //cropOptions = new CropOptions.Builder().setAspectX(1).setAspectY(1).setWithOwnCrop(false).create();  //设置裁剪参数
         compressConfig=new CompressConfig.Builder().setMaxSize(50*1024).setMaxPixel(800).create();  //设置压缩参数
         takePhoto.onEnableCompress(compressConfig,true);  //设置为需要压缩
-
     }
 
     private void initClickEvent() {
@@ -137,6 +152,9 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
         sendPicBtn.setOnClickListener(this);
     }
 
+    public void funcGetNewMessage(DataItemNewMessage data){
+        Toast.makeText(this, "Hello", Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     public void onClick(View view) {
@@ -190,14 +208,15 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
             mQueue = Volley.newRequestQueue(this);
         }
 
-        String urlNewMsg = "http://115.28.66.165:8080/SendMessage.action?username=" + nickname + "&friendName=" + friendName + "&message" +
-                msg +"&time" + "201705121123";
-
+        String urlNewMsg = "http://211.83.103.247:8037/TeamTalk/SendMessage.action?username=" + nickname + "&friendName=" + friendName + "&message=" +
+                msg +"&time=" + "201705121123";
+        Log.i("TTT",urlNewMsg);
 
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urlNewMsg, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                Toast.makeText(ActivityChatWindow.this, "OK" + s, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(ActivityChatWindow.this, "OK" + s, Toast.LENGTH_SHORT).show();
+
             }
         }, new Response.ErrorListener() {
             @Override
@@ -211,7 +230,7 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
 
     private void funcSendPicToFri(String path) {
         picStr = bitmapToBase64(decodeFileUtils(path));
-        //Log.i("TAGPIC",picStr);
+        Log.i("TTTT",picStr);
 
         DataChatMessage msg = new DataChatMessage(userId,friNickName,"",DataChatMessage.TYPE_SEND,DataChatMessage.IF_PIC_YES, path);
         personChats.add(msg);
@@ -223,13 +242,14 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
             mQueue = Volley.newRequestQueue(this);
         }
 
-        String urlSendPic = "http://115.28.66.165:8080/SendPicture:.action?username=" + userInfoStatic.getUsername() + "&friendName=" + friNickName + "&head" +
-                picStr +"&time" + "201705121123";
+        String urlSendPic = "http://211.83.103.247:8037/TeamTalk/SendPicture.action?username=" + userInfoStatic.getUsername() + "&friendName=" + friNickName + "&head=" +
+                picStr +"&time=" + "201705121123";
 
+        Log.i("TTTT",urlSendPic);
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urlSendPic, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                Toast.makeText(ActivityChatWindow.this, "OK" + s, Toast.LENGTH_SHORT).show();
+                Log.i("TTTT","picSendOK");
             }
         }, new Response.ErrorListener() {
             @Override
@@ -241,19 +261,36 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
         mQueue.add(loginRequest);
     }
 
-/*    private void initSend() {
-        *//**
+    private void initSend() {
+        /**
          * 虚拟3条发送方的消息
-         *//*
+         */
         DataChatMessage msg;
         msg = new DataChatMessage(userId,friNickName,"Hello guy",DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
         personChats.add(msg);
-        msg = new DataChatMessage(userId,friNickName,"Hello.Who is that?",DataChatMessage.TYPE_SEND,DataChatMessage.IF_PIC_NO,"");
+        /*msg = new DataChatMessage(userId,friNickName,"Hello.Who is that?",DataChatMessage.TYPE_SEND,DataChatMessage.IF_PIC_NO,"");
         personChats.add(msg);
         msg = new DataChatMessage(userId,friNickName,"This is Tom.Nice talking to you.",DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
-        personChats.add(msg);
+        personChats.add(msg);*/
         lv_chat_listView.setAdapter(chatAdapter);
-    }*/
+    }
+
+    private void initSend2(String message) {
+        /**
+         * 虚拟3条发送方的消息
+         */
+        DataChatMessage msg;
+        msg = new DataChatMessage(userId,friNickName,"Hello guy",DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
+        personChats.add(msg);
+        msg = new DataChatMessage(userId,friNickName,message,DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
+        personChats.add(msg);
+        /*msg = new DataChatMessage(userId,friNickName,"Hello.Who is that?",DataChatMessage.TYPE_SEND,DataChatMessage.IF_PIC_NO,"");
+        personChats.add(msg);
+        msg = new DataChatMessage(userId,friNickName,"This is Tom.Nice talking to you.",DataChatMessage.TYPE_RECEIVED,DataChatMessage.IF_PIC_NO,"");
+        personChats.add(msg);*/
+        lv_chat_listView.setAdapter(chatAdapter);
+        //Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show();
+    }
 
     public static void actionStart(Context context){
         Intent intent = new Intent(context,ActivityChatWindow.class);

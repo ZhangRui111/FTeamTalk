@@ -63,7 +63,8 @@
                 android:id="@+id/emojiBtn"
                 android:src="@mipmap/ic_tag_faces_black_24dp"
                 android:layout_width="30dp"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
             <ImageButton
                 android:id="@+id/picBtn"
                 android:src="@mipmap/ic_photo_black_24dp"

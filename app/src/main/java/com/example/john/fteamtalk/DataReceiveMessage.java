@@ -9,6 +9,12 @@ public class DataReceiveMessage {
     private String msg;
     private Data data;
 
+    public DataReceiveMessage(Data data, String code, String msg) {
+        this.data = data;
+        this.code = code;
+        this.msg = msg;
+    }
+
     public class Data{
         private String username;
         private String friendName;
@@ -29,6 +35,13 @@ public class DataReceiveMessage {
 
         public String getMessage() {
             return message;
+        }
+
+        public Data(String username, String friendName, String tiem, String message) {
+            this.username = username;
+            this.friendName = friendName;
+            this.tiem = tiem;
+            this.message = message;
         }
     }
 
