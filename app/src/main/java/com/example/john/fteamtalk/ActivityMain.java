@@ -2,6 +2,9 @@ package com.example.john.fteamtalk;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -85,6 +88,7 @@ public class ActivityMain extends BaseActivity
 
     //dialog
     private AlertDialog dialog;
+    private int notificationId = 1;
 
     //定时任务
     private Timer timer;
@@ -592,6 +596,10 @@ public class ActivityMain extends BaseActivity
                 public void onResponse(String s) {
                     Log.i("TTT",s);
 
+                    /**
+                     * 添加
+                     */
+                    funcNotification("???");
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -602,6 +610,29 @@ public class ActivityMain extends BaseActivity
 
             mQueue.add(receiveFriListRequest);
         }
+    }
+
+    /**
+     * 收到好友请求后发出Notification
+     */
+    private void funcNotification(String friendName) {
+        Intent mainIntent = new Intent(this, ActivityConfirmFriend.class);
+        mainIntent.putExtra("friendName",friendName);
+        PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification.Builder builder=new Notification.Builder(ActivityMain.this);
+        builder.setContentTitle("A new friend request!");
+        builder.setContentText("Hello,this is " + friendName);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
+        builder.setAutoCancel(true);
+        builder.setContentIntent(mainPendingIntent);
+        NotificationManager manager=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+    /*
+    *此处的ID值作为Notification的唯一标示，
+    */
+        Notification notify = builder.build();
+        manager.notify(notificationId++,notify);//触发Notification
     }
 
     /**
