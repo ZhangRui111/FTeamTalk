@@ -9,8 +9,13 @@ import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Created by john on 2017/3/14.

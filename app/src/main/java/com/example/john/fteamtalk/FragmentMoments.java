@@ -82,8 +82,8 @@ public class FragmentMoments extends Fragment {
 
     private void initView() {
 
-        DataItemNewMessage data = new DataItemNewMessage("gyh","Where?",1);
-        msgList.add(data);
+        /*DataItemNewMessage data = new DataItemNewMessage("gyh","Where?",1);
+        msgList.add(data);*/
         msgListView = (ListView) view.findViewById(R.id.newMessage_listView);
         //实例化适配器，注意和构造函数的参数的意义结合来看，第一个参数是上下文，第二个是自定义的布局id，第三个是要显示的数据源
         myAdapter = new AdapterNewMessage(getActivity(), R.layout.item_new_message,msgList);

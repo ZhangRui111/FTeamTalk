@@ -189,8 +189,8 @@ public class ActivityModifyPassword extends AppCompatActivity implements View.On
             mQueue = Volley.newRequestQueue(ActivityModifyPassword.this);
         }
 
-        String ulrdeleteFri = urlHead + "modifyPassword.action?username=" + userInfoStatic.getUsername() +
-                "&password=" + newString;
+        String ulrdeleteFri = urlHead + "changePassword.action?username=" + userInfoStatic.getUsername() +
+                "&password=" + oldString + "&newPassword=" + newString;
 
         //Log.i("TTTT",ulrFriendList);
         StringRequest deleteFriendRequest = new StringRequest(Request.Method.POST, ulrdeleteFri, new Response.Listener<String>() {
@@ -198,7 +198,7 @@ public class ActivityModifyPassword extends AppCompatActivity implements View.On
             public void onResponse(String s) {
                 //Log.i("LISTTTT",s);
                 Toast.makeText(ActivityModifyPassword.this, "Change password ok!", Toast.LENGTH_SHORT).show();
-
+                waitingDialog.dismiss();
             }
         }, new Response.ErrorListener() {
             @Override

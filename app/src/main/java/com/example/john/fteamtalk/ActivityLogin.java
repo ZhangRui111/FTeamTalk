@@ -19,6 +19,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -56,6 +57,7 @@ import java.util.Map;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_WRITE_EXTERNAL_STORAGE;
 import static com.example.john.fteamtalk.UtilsFinalArguments.dataList;
+import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
 
@@ -243,8 +245,8 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         final String passwordTmp = password;
 
 
-        String urllogin = "http://115.28.66.165:8080/login.action?username=" + phoneTmp + "&password=" + passwordTmp;
-
+        String urllogin = urlHead + "login.action?username=" + phoneTmp + "&password=" + passwordTmp;
+        Toast.makeText(this, "" + phoneTmp, Toast.LENGTH_SHORT).show();
         //提示正在登陆
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityLogin.this, R.style.MyAlertDialogStyle);
         builder.setTitle("登录中");
@@ -261,7 +263,7 @@ public class ActivityLogin extends BaseActivity implements View.OnClickListener 
         StringRequest loginRequest = new StringRequest(Request.Method.POST, urllogin, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                //Log.d("TAG", s);
+                Log.d("TAG", s);
 
                 Gson gson = new Gson();
                 DataLoginRegister dataLoginRegister = gson.fromJson(s, DataLoginRegister.class);

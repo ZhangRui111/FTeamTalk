@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,7 +22,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 
+import static com.example.john.fteamtalk.UtilsFinalArguments.newRequestFriend;
 import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
@@ -76,11 +79,15 @@ public class ActivityConfirmFriend extends BaseActivity {
                     mQueue = Volley.newRequestQueue(ActivityConfirmFriend.this);
                 }
 
-                StringRequest setNicknameRequest = new StringRequest(Request.Method.POST, urlHead + "addfriend.action?username="
-                        + userInfoStatic.getUsername(), new Response.Listener<String>() {
+                StringRequest setNicknameRequest = new StringRequest(Request.Method.POST, urlHead + "addFriend.action?username="
+                        + userInfoStatic.getUsername() + "&friendName=" + friendName, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-
+                        Toast.makeText(ActivityConfirmFriend.this, "" + s, Toast.LENGTH_SHORT).show();
+                        Log.i("TTT","Frti" + s);
+                        Log.i("TTT","Frti" +  urlHead + "addFriend.action?username="
+                                + userInfoStatic.getUsername() + "&Friendname=" + friendName);
+                        newRequestFriend = friendName;
                     }
                 }, new Response.ErrorListener() {
                     @Override

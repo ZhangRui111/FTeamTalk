@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -25,8 +26,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 
-import static com.example.john.fteamtalk.UtilsFinalArguments.contactList;
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
@@ -46,25 +50,33 @@ public class ActivityContact extends BaseActivity {
     //Volley
     private RequestQueue mQueue;
 
+    //data
+    private List<DataFriendInfo> lists;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
         setImmersiveMode();
 
-        initView();
-        initClickAction();
+        lists = new ArrayList<>();
+        initData();
+        //initView();
+        //initClickAction();
     }
 
     private void initView() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        myAdapter = new AdapterContactList(ActivityContact.this, R.layout.item_friendlist,contactList);  //实例化适配器，注意和构造函数的参数的意义结合来看，第一个参数是上下文，第二个是自定义的布局id，第三个是要显示的数据源
+        Toast.makeText(this, "" + lists.size(), Toast.LENGTH_SHORT).show();
+        for(int i=0;i<lists.size();i++){
+            Toast.makeText(this, "" + i + lists.get(i).getUserNickName(), Toast.LENGTH_SHORT).show();
+        }
+        myAdapter = new AdapterContactList(ActivityContact.this, R.layout.item_friendlist,lists);  //实例化适配器，注意和构造函数的参数的意义结合来看，第一个参数是上下文，第二个是自定义的布局id，第三个是要显示的数据源
         contactListView = (ListView) findViewById(R.id.contact_listView);
         contactListView.setAdapter(myAdapter);  //将适配器传给实例化的listView
         contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final DataFriendInfo selectedEntity = contactList.get(i);//得到点击的那一项
+                final DataFriendInfo selectedEntity = lists.get(i);//得到点击的那一项
                 //以下是点击逻辑行
                 //Toast.makeText(ActivityContact.this, selectedEntity.getUserNickName(), Toast.LENGTH_SHORT).show();
                 final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityContact.this, R.style.MyAlertDialogStyle);
@@ -98,22 +110,33 @@ public class ActivityContact extends BaseActivity {
         });
     }
 
-    private void funcWhat(String friendname) {
-        Toast.makeText(this, "Request has been send!", Toast.LENGTH_SHORT).show();
-        //网络Http修改昵称
+    private void initData() {
+        //contactList.clear();
+       //网络Http修改昵称
         if (mQueue == null) {
             mQueue = Volley.newRequestQueue(ActivityContact.this);
         }
 
-        StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, "http://115.28.66.165:8080/RequestAddFriend.action?username="
-                + userInfoStatic.getUsername() + "&friendName" + friendname, new Response.Listener<String>() {
+        StringRequest setNicknameRequest = new StringRequest(Request.Method.PUT, urlHead + "sendAllUserInfo.action?", new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 //doNothing
+                Log.i("TTT","allusers" + s);
+                Gson gson = new Gson();
+                DatasllUser data = gson.fromJson(s,DatasllUser.class);
+                for(int i = 0;i<data.getData().size();i++) {
+                    DataFriendInfo tmpData;
+                    //Toast.makeText(ActivityContact.this, "" + i + data.getData().get(i).getUsername(), Toast.LENGTH_SHORT).show();
+                    tmpData = new DataFriendInfo(i, data.getData().get(i).getUsername(), "");
+                    lists.add(tmpData);
+                }
+                initView();
+                initClickAction();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
+
             }
         });
 
@@ -122,7 +145,7 @@ public class ActivityContact extends BaseActivity {
 
     private void funcRequestNewFriend(String friendName) {
         Toast.makeText(this, "Request has been send!", Toast.LENGTH_SHORT).show();
-        friendName = "1234";
+        //friendName = "123";
         //初始化一个网络请求队列
         if (mQueue == null) {
             mQueue = Volley.newRequestQueue(ActivityContact.this);

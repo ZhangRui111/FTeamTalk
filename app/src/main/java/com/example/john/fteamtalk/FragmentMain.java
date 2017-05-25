@@ -45,7 +45,6 @@ import java.util.List;
 import static com.example.john.fteamtalk.UtilsFinalArguments.HANDLER_NEW_FRIEND;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_READ_CONTACT;
 import static com.example.john.fteamtalk.UtilsFinalArguments.REQUEST_USUAL;
-import static com.example.john.fteamtalk.UtilsFinalArguments.contactList;
 import static com.example.john.fteamtalk.UtilsFinalArguments.dataList;
 import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
@@ -119,35 +118,43 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         StringRequest friendListRequest = new StringRequest(Request.Method.POST, ulrFriendList, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                //Log.i("LISTTTT",s);
+                Log.i("TTTS","friendList"+s);
                 Gson gson = new Gson();
                 DataFriendList dat = gson.fromJson(s,DataFriendList.class);
 
-                int n = 0;
-                for(;n<dat.getData().size();n++){
-                    String Str = dat.getDataItem(n).getDepart();
-                    String departStr = "";
-                    switch (Str) {
-                        case "0":
-                            departStr = "IT部";
-                            break;
-                        case "1":
-                            departStr = "秘书处";
-                            break;
-                        case "2":
-                            departStr = "后勤部";
-                            break;
-                        case "3":
-                            departStr = "经理部";
-                            break;
-                        case "4":
-                            departStr = "销售部";
-                            break;
-                        default:
-                            break;
+                if (dat.getData() != null) {
+                    int n = 0;
+                    for(;n<dat.getData().size();n++) {
+                        String departStr = "";
+                        if (dat.getDataItem(n).getDepart() != null){
+                            String Str = dat.getDataItem(n).getDepart();
+                            switch (Str) {
+                                case "0":
+                                    departStr = "IT部";
+                                    break;
+                                case "1":
+                                    departStr = "秘书处";
+                                    break;
+                                case "2":
+                                    departStr = "后勤部";
+                                    break;
+                                case "3":
+                                    departStr = "经理部";
+                                    break;
+                                case "4":
+                                    departStr = "销售部";
+                                    break;
+                                default:
+                                    break;
+                            }
+                            Toast.makeText(getActivity(), "OKOK", Toast.LENGTH_SHORT).show();
+                        } else {
+                            departStr = "";
+                        }
+                        DataFriendInfo Data = new DataFriendInfo(n, dat.getDataItem(n).getFriendName(), departStr);
+                        dataList.add(Data);
+                        myAdapter.notifyDataSetChanged();
                     }
-                    DataFriendInfo Data = new DataFriendInfo(n,dat.getDataItem(n).getUsername(),departStr);
-                    dataList.add(Data);
                 }
 
             }
@@ -159,12 +166,12 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         });
         mQueue.add(friendListRequest);
 
-        tmpData = new DataFriendInfo(i++,"zzz","后勤部");
+        /*tmpData = new DataFriendInfo(i++,"zzz","后勤部");
         dataList.add(tmpData);
         tmpData = new DataFriendInfo(i++,"gyh","IT部");
-        dataList.add(tmpData);
+        dataList.add(tmpData);*/
 
-        contactList = new ArrayList<>();  //通讯录
+        //contactList = new ArrayList<>();  //通讯录
     }
 
     private void initView() {
@@ -300,7 +307,7 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         StringRequest deleteFriendRequest = new StringRequest(Request.Method.POST, ulrdeleteFri, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                //Log.i("LISTTTT",s);
+                Log.i("LISTTTT",s);
                 Toast.makeText(getActivity(), "Delete complete!", Toast.LENGTH_SHORT).show();
 
             }
@@ -315,7 +322,7 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
 
     private void funcNewFriend() {
 
-        //提示正在登陆
+        /*//提示正在登陆
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
         builder.setTitle("准备通讯录数据");
         builder.setCancelable(false);
@@ -323,10 +330,12 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
         builder.setView(progressBar, 20, 20, 20, 20);
         waitingDialog = builder.create();
         waitingDialog.show();
-        new ContactTask().execute();
+        new ContactTask().execute();*/
+        ActivityContact.actionStart(getActivity());
+        getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
-    class ContactTask extends AsyncTask<String, Integer, Void> {
+    /*class ContactTask extends AsyncTask<String, Integer, Void> {
 
         protected Void doInBackground(String... params) {
             if (flag == true) {
@@ -372,5 +381,5 @@ public class FragmentMain extends Fragment implements View.OnClickListener {
             getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
         }
 
-    }
+    }*/
 }

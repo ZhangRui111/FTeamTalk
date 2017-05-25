@@ -46,6 +46,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.john.fteamtalk.UtilsFinalArguments.urlHead;
 import static com.example.john.fteamtalk.UtilsFinalArguments.userInfoStatic;
 
 
@@ -175,7 +176,7 @@ public class ActivityRegister extends BaseActivity implements View.OnClickListen
             mQueue = Volley.newRequestQueue(ActivityRegister.this);
         }
 
-        String urllogin = "http://115.28.66.165:8080/login.action?username=" + phoneTmp + "&password=" + passwordTmp;
+        String urllogin = urlHead + "login.action?username=" + phoneTmp + "&password=" + passwordTmp;
 
         //提示正在登陆
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ActivityRegister.this, R.style.MyAlertDialogStyle);

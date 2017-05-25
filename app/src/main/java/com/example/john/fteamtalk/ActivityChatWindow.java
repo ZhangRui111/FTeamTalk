@@ -343,11 +343,11 @@ public class ActivityChatWindow extends TakePhotoActivity implements View.OnClic
                     if (data != null) {
                         if (data.getData() != null){
                             Log.i("TTTT","msg:" + data.getData().getMessage());
-                            if (data.getData().getFriendName().equals(friNickName)) {
+                            //if (data.getData().getFriendName().equals(friNickName)) {
                                 //发信人和目前所在的对话框的人一致
-                                newMessage = data.getMsg();
+                                newMessage = data.getData().getMessage();
                                 handler.sendEmptyMessage(199);
-                            }
+                            //}
                         }
                     }
                 }

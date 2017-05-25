@@ -42,11 +42,13 @@ public class UtilsFinalArguments {
 
     //好友列表
     public static List<DataFriendInfo> dataList;
-    public static List<DataFriendInfo> contactList;
+    //public static List<DataFriendInfo> contactList;
 
     //用户信息
     public static DataUserInfo userInfoStatic;
 
     //请求头部
-    public static String urlHead = "http://211.83.99.167:8037/TeamTalk/";
+    public static String urlHead = "http://211.83.100.35:8037/TeamTalk/";
+
+    public static String newRequestFriend;
 }

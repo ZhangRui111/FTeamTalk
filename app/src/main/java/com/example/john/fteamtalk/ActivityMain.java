@@ -230,7 +230,7 @@ public class ActivityMain extends BaseActivity
         timer.schedule(msgTask,5000,3*1000);//5秒后每3秒执行该任务一次--接收消息
         //timer.schedule(msgTask,1*60*1000);//1分钟后执行该任务一次
         timer.schedule(msgPicTask,6000,5*1000);  //6秒后每15秒执行该任务一次--接收图片
-        timer.schedule(waitFriReqTask,7000,20*1000);  //6秒后每20秒执行该任务一次--接收好友请求
+        timer.schedule(waitFriReqTask,7000,20*1000);  //6秒后每20秒执行该任务一次--接收好友请求*/
     }
 
     private void initUserInfo() {
@@ -244,27 +244,28 @@ public class ActivityMain extends BaseActivity
             @Override
             public void onResponse(String s) {
 
+                Log.i("TTTS",s);
                 Gson gson = new Gson();
                 DataInitUserInfo data = gson.fromJson(s,DataInitUserInfo.class);
-                if(data.getData().getSignature() != null) {
-                    userInfoStatic.setSignature(data.getData().getSignature());
-                }
-                if (data.getData().getNickname() != null) {
-                    userInfoStatic.setNickname(data.getData().getNickname());
-                }
-                if (data.getData().getSex() != null) {
-                    userInfoStatic.setUsersex(data.getData().getSex());
-                }
-                if (data.getData().getDepart() != null) {
-                    userInfoStatic.setDepartment(data.getData().getDepart());
+                if (data.getData() != null) {
+                    if(data.getData().getSignature() != null) {
+                        userInfoStatic.setSignature(data.getData().getSignature());
+                    }
+                    if (data.getData().getNickname() != null) {
+                        userInfoStatic.setNickname(data.getData().getNickname());
+                    }
+                    if (data.getData().getSex() != null) {
+                        userInfoStatic.setUsersex(data.getData().getSex());
+                    }
+                    if (data.getData().getDepart() != null) {
+                        userInfoStatic.setDepartment(data.getData().getDepart());
+                    }
+
+                    if (userInfoStatic.getNickname() != null) {
+                        drawerUserNameTxv.setText(userInfoStatic.getNickname());
+                    }
                 }
 
-                if (userInfoStatic.getNickname() != null) {
-                    drawerUserNameTxv.setText(userInfoStatic.getNickname());
-                }
-                if (userInfoStatic.getSignature() != null) {
-                    drawerUserSignTxv.setText(userInfoStatic.getSignature());
-                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -594,12 +595,17 @@ public class ActivityMain extends BaseActivity
             StringRequest receiveFriListRequest = new StringRequest(Request.Method.POST, urlListMsg, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
-                    Log.i("TTT",s);
+                    Log.i("TTTS","List" + s);
+                    DataArrayFriend dat = new Gson().fromJson(s,DataArrayFriend.class);
+                    if (dat.getData() != null){
+                        List<String> list = dat.getData();
+                        if (list != null) {
+                            for(int i = 0;i<list.size();i++) {
+                                funcNotification(list.get(i));
+                            }
+                        }
+                    }
 
-                    /**
-                     * 添加
-                     */
-                    funcNotification("???");
                 }
             }, new Response.ErrorListener() {
                 @Override
